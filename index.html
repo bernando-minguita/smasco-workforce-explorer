@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
 <head>
@@ -7,13 +6,9 @@
   <title>SMASCO Workforce Explorer</title>
   <link rel="icon" href="https://www.smasco.com/wp-content/uploads/2023/02/cropped-favicon-32x32.png" sizes="32x32" />
   <link rel="icon" href="https://www.smasco.com/wp-content/uploads/2023/02/cropped-favicon-192x192.png" sizes="192x192" />
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- SheetJS for Excel Export -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-
   <script>
     tailwind.config = {
       theme: {
@@ -26,47 +21,20 @@
       }
     }
   </script>
-
   <style>
-    /* Custom Scrollbar Styling */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    .sticky-col-0 {
-      position: sticky;
-      left: 0;
-      z-index: 20;
-    }
-    .sticky-col-1 {
-      position: sticky;
-      left: 40px;
-      z-index: 20;
-    }
-    .sticky-col-2 {
-      position: sticky;
-      left: 152px;
-      z-index: 20;
-    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sticky-col-0 { position: sticky; left: 0; z-index: 20; }
+    .sticky-col-1 { position: sticky; left: 40px; z-index: 20; }
+    .sticky-col-2 { position: sticky; left: 152px; z-index: 20; }
   </style>
 </head>
 <body class="h-full flex flex-col font-sans text-slate-800 text-sm antialiased overflow-hidden select-none">
-
   <div id="app" class="flex flex-col h-screen w-full bg-white overflow-hidden">
-    
     <!-- Top Navigation & Toolbar Header -->
     <header class="bg-white text-slate-800 border-b border-blue-100 flex flex-col shadow-sm z-30 shrink-0">
-      
       <!-- Upper Navigation Bar -->
       <div class="flex items-center justify-between px-5 py-3 border-b border-blue-100">
         <div class="flex items-center gap-3">
@@ -81,8 +49,6 @@
             <p class="text-xs text-slate-500">Navigate Contracts, Projects & Worker Profiles</p>
           </div>
         </div>
-
-        <!-- Auth Form & Status Section -->
         <div class="flex items-center gap-4">
           <div id="auth-unconnected-form" class="flex items-center gap-2">
             <input id="auth-username" type="text" placeholder="Username" class="bg-white border border-blue-200 rounded px-3 py-1 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-32 transition-all" />
@@ -91,16 +57,17 @@
               <i data-lucide="key" class="w-3.5 h-3.5"></i> Connect
             </button>
           </div>
-
           <div id="auth-connected-badge" class="hidden flex items-center gap-4">
             <div class="flex items-center gap-2 text-xs text-slate-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              <span id="stat-hdr-contracts" class="font-semibold text-blue-900">0</span>               <span class="text-xs uppercase text-slate-600">Contracts</span>
+              <span id="stat-hdr-contracts" class="font-semibold text-blue-900">0</span>
+              <span class="text-xs uppercase text-slate-600">Contracts</span>
               <span class="text-blue-300">|</span>
-              <span id="stat-hdr-projects" class="font-semibold text-blue-900">0</span>               <span class="text-xs uppercase text-slate-600">Projects</span>
+              <span id="stat-hdr-projects" class="font-semibold text-blue-900">0</span>
+              <span class="text-xs uppercase text-slate-600">Projects</span>
               <span class="text-blue-300">|</span>
-              <span id="stat-hdr-workers" class="font-semibold text-blue-900">0</span>               <span class="text-xs uppercase text-slate-600">Workers</span>
+              <span id="stat-hdr-workers" class="font-semibold text-blue-900">0</span>
+              <span class="text-xs uppercase text-slate-600">Workers</span>
             </div>
-
             <div class="flex items-center gap-2 text-xs text-slate-600 font-medium bg-green-50 px-3 py-1 rounded-full border border-green-200">
               <span class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -108,51 +75,43 @@
               </span>
               <span id="connected-username" class="text-green-800"></span><span class="text-green-800">Connected</span>
             </div>
-            
             <button onclick="handleDisconnect()" class="text-xs text-slate-500 hover:text-slate-700 underline transition-colors">Disconnect</button>
           </div>
         </div>
       </div>
-
       <!-- Lower Control Toolbar -->
       <div class="bg-blue-50 px-5 py-2 flex items-center justify-between border-t border-blue-100">
         <div class="flex items-center gap-5 text-xs">
-          <!-- Parallel Toggle -->
           <label class="flex items-center gap-2 text-slate-700 cursor-pointer select-none">
             <input id="chk-parallel" type="checkbox" checked onchange="toggleParallel(this.checked)" class="rounded bg-white border-blue-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-blue-50 h-3.5 w-3.5" />
             <span class="font-medium">Parallel Extraction</span>
           </label>
-
-          <!-- Thread Slider -->
           <div class="flex items-center gap-2 opacity-90 border-l border-blue-200 pl-4">
             <span class="text-slate-600 font-medium">Threads:</span>
             <input id="slider-threads" type="range" min="1" max="20" value="10" oninput="updateThreads(this.value)" class="w-20 accent-blue-500 h-1 bg-blue-200 rounded-lg appearance-none cursor-pointer" />
             <span id="thread-count-disp" class="font-mono text-slate-700 font-semibold w-4">10</span>
           </div>
-
           <div class="h-4 w-px bg-blue-200"></div>
-
-          <!-- Worker Count -->
           <span id="worker-count" class="text-slate-700 text-xs font-medium">
             Workers: <span id="worker-count-val" class="font-mono text-slate-900">0</span>
           </span>
         </div>
-
-        <!-- Action Buttons -->
         <div class="flex items-center gap-2">
+          <button id="btn-validate" onclick="openValidationDashboard()" disabled class="flex items-center gap-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed px-3.5 py-1 rounded text-xs font-medium transition-all shadow-sm">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Validation Dashboard</span>
+          </button>
           <button id="btn-refresh" onclick="showRefreshModal()" disabled class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 text-white px-3.5 py-1 rounded text-xs font-medium transition-all shadow-sm disabled:cursor-not-allowed">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-icon"></i>
             <span id="refresh-label">Refresh All</span>
           </button>
-
           <button id="btn-export" onclick="exportToExcel()" disabled class="flex items-center gap-1.5 bg-blue-700 hover:bg-blue-800 text-white px-3.5 py-1 rounded text-xs font-medium transition-all border border-blue-600 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
             <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-blue-100"></i>
-            <span>Generate Master Excel</span>
+            <span id="export-label">Generate Master Excel</span>
           </button>
         </div>
       </div>
     </header>
-
     <!-- Status Message Bar -->
     <div id="status-bar" class="bg-blue-600 text-white text-xs px-4 py-2 border-b border-blue-700 shrink-0 z-50">
       <div class="flex items-center gap-2">
@@ -160,10 +119,13 @@
         <span id="status-message" class="truncate">Ready</span>
       </div>
     </div>
-
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="hidden bg-amber-50 text-amber-900 text-xs px-4 py-2 border-b border-amber-200 shrink-0 z-40 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+      <span>You are offline. Showing cached data. Some features may be limited.</span>
+    </div>
     <!-- Main Body Workspace -->
     <div class="flex flex-1 overflow-hidden relative">
-      
       <!-- Overlay Screen for Unauthenticated State -->
       <div id="auth-overlay" class="absolute inset-0 bg-blue-50/80 backdrop-blur-sm z-40 flex items-center justify-center transition-all">
         <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md border border-blue-100 flex flex-col items-center">
@@ -171,15 +133,14 @@
             <i data-lucide="shield-check" class="w-8 h-8"></i>
           </div>
           <h2 class="text-xl font-bold text-slate-900 mb-2">Authentication Required</h2>
-          <p class="text-slate-600 text-sm leading-relaxed mb-6">Get started by connecting – we’ll pull in your contracts, projects, and workers.</p>
+          <p class="text-slate-600 text-sm leading-relaxed mb-6">Get started by connecting – we'll pull in your contracts, projects, and workers.</p>
           <button onclick="handleConnect()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-2">
             <i data-lucide="key" class="w-4 h-4"></i> Authenticate & Initialize
           </button>
           <p class="text-slate-500 text-xs mt-3">Press Connect to authenticate and load your workforce data.</p>
         </div>
       </div>
-
-      <!-- Left Sidebar: Contracts -> Projects Hierarchy Tree View -->
+      <!-- Left Sidebar -->
       <aside id="sidebar" class="bg-white border-r border-blue-100 flex flex-col h-full overflow-hidden shrink-0 transition-all duration-200" style="width: 312px;">
         <div id="sidebar-header" class="p-3.5 border-b border-blue-100 bg-blue-50/60 flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -199,21 +160,15 @@
         <button id="sidebar-expand-btn" onclick="toggleSidebar()" class="hidden absolute left-0 top-3 bg-white border border-blue-200 rounded-r p-1.5 shadow-sm hover:bg-blue-50 z-20">
           <i data-lucide="panel-left-open" class="w-3.5 h-3.5 text-slate-700"></i>
         </button>
-
-        <!-- Sidebar Filter Input -->
         <div id="sidebar-filter" class="p-2 border-b border-blue-100 bg-white">
           <div class="relative">
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400"></i>
-            <input id="tree-search" type="text" placeholder="Filter contracts/projects..." oninput="filterScopeTree(this.value)" class="w-full pl-8 pr-3 py-1 text-xs border border-blue-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white" />
+            <input id="tree-search" type="text" placeholder="Filter contracts/projects..." oninput="handleTreeSearch(this.value)" class="w-full pl-8 pr-3 py-1 text-xs border border-blue-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white" />
           </div>
         </div>
-
-        <!-- Scrollable Tree Container -->
         <div id="tree-container" class="flex-1 overflow-y-auto p-2 text-xs space-y-1">
           <div class="text-center text-slate-400 py-8 text-sm">Connect to load data</div>
         </div>
-
-        <!-- Cache Indicator -->
         <div id="cache-indicator" class="p-2 border-t border-blue-100 bg-blue-50/40">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Cache Status</span>
@@ -230,10 +185,8 @@
           <div id="cache-last-updated" class="text-[10px] text-slate-400 mt-1">Last updated: Never</div>
         </div>
       </aside>
-
       <!-- Main Data Grid Container -->
       <main class="flex-1 bg-white flex flex-col overflow-hidden relative">
-        
         <!-- Grid Filter Toolbar -->
         <div class="flex items-center justify-between px-4 py-2.5 border-b border-blue-100 bg-blue-50/40 shrink-0">
           <div class="flex items-center gap-3">
@@ -241,18 +194,15 @@
               <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
               <input id="grid-search" type="text" placeholder="Search worker, ID, passport, profession..." oninput="handleGridSearch(this.value)" class="pl-9 pr-4 py-1.5 border border-blue-200 rounded-lg text-xs w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" />
             </div>
-
             <select id="job-profession-filter" onchange="handleJobProfessionFilter(this.value)" class="border border-blue-200 rounded-lg text-xs px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">All Professions</option>
               <option value="Driver">Driver</option>
               <option value="Labor General">Labor General</option>
               <option value="Cleaner">Cleaner</option>
             </select>
-
             <select id="main-status-filter" onchange="handleMainStatusFilter(this.value)" class="border border-blue-200 rounded-lg text-xs px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">All Status</option>
             </select>
-
             <div class="flex items-center gap-2 border-l border-blue-200 pl-3">
               <span class="text-xs text-slate-600 font-medium">Columns:</span>
               <button onclick="toggleColumnVisibility()" class="text-xs text-blue-700 hover:text-blue-900 font-medium flex items-center gap-1">
@@ -260,7 +210,6 @@
               </button>
             </div>
           </div>
-
           <div class="flex items-center gap-3">
             <span id="grid-records-count" class="text-xs font-medium text-slate-500">Showing 0 records</span>
             <button onclick="resetFilters()" class="text-xs text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1">
@@ -268,21 +217,15 @@
             </button>
           </div>
         </div>
-
         <!-- Data Table Container -->
         <div class="flex-1 overflow-auto bg-white relative">
           <table class="w-full text-left border-collapse table-auto min-w-max">
             <thead class="sticky top-0 bg-blue-50/90 backdrop-blur-sm z-30 border-b border-blue-200 shadow-sm">
-              <tr id="table-header-row" class="text-xs font-semibold text-slate-800 uppercase tracking-wider select-none">
-                <!-- Dynamically Generated Columns -->
-              </tr>
+              <tr id="table-header-row" class="text-xs font-semibold text-slate-800 uppercase tracking-wider select-none"></tr>
             </thead>
-            <tbody id="table-body" class="divide-y divide-blue-50 text-sm">
-              <!-- Dynamically Generated Rows -->
-            </tbody>
+            <tbody id="table-body" class="divide-y divide-blue-50 text-sm"></tbody>
           </table>
         </div>
-
         <!-- Pagination Footer -->
         <footer class="flex items-center justify-between px-4 py-2.5 border-t border-blue-100 bg-blue-50/60 shrink-0">
           <div class="flex items-center gap-2 text-xs text-slate-600">
@@ -294,7 +237,6 @@
               <option value="250">250</option>
             </select>
           </div>
-
           <div class="flex items-center gap-4 text-xs">
             <span id="pagination-info" class="text-slate-600 font-medium">Page 1 of 1</span>
             <div class="flex items-center gap-1">
@@ -307,32 +249,27 @@
             </div>
           </div>
         </footer>
-
       </main>
     </div>
-
     <!-- Column Visibility Modal -->
     <div id="column-modal" class="hidden fixed inset-0 z-50 bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
       <div class="bg-white rounded-xl shadow-2xl border border-blue-200 w-80 max-h-[80vh] flex flex-col">
         <div class="p-4 border-b border-blue-100 flex items-center justify-between">
           <h3 class="font-semibold text-sm text-slate-800">Column Visibility</h3>
-          <button onclick="closeColumnModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-blue-50">
+          <button onclick="closeModal('column-modal')" class="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-blue-50">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
-        <div id="column-checkboxes" class="flex-1 overflow-y-auto p-4 space-y-2">
-        </div>
+        <div id="column-checkboxes" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
         <div class="p-3 border-t border-blue-100 flex items-center justify-between bg-blue-50/40 rounded-b-xl">
           <button onclick="showAllColumns()" class="text-xs text-blue-700 hover:text-blue-900 font-medium">Show All</button>
           <button onclick="applyColumnVisibility()" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 font-medium">Apply</button>
         </div>
       </div>
     </div>
-
-    <!-- Worker Profile Modal Drawer -->
-    <div id="worker-modal" class="hidden fixed inset-0 z-50 bg-blue-900/20 backdrop-blur-xs flex justify-end transition-opacity">
-      <div class="w-full max-w-xl bg-white h-full shadow-2xl flex flex-col border-l border-blue-200 animate-in slide-in-from-right duration-200">
-        <!-- Modal Header -->
+    <!-- Worker Profile Modal -->
+    <div id="worker-modal" class="hidden fixed inset-0 z-[60] bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 w-full max-w-2xl max-h-[85vh] flex flex-col">
         <div class="p-4 bg-blue-600 text-white flex items-center justify-between border-b border-blue-700 select-text">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-500/30 border border-blue-400/40 rounded-lg text-blue-100">
@@ -343,14 +280,11 @@
               <p id="modal-personnel-no" class="text-xs text-blue-100 font-mono">L_000000</p>
             </div>
           </div>
-          <button onclick="closeWorkerModal()" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
+          <button onclick="closeModal('worker-modal')" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
-
-        <!-- Modal Body Content -->
         <div class="flex-1 overflow-y-auto p-5 space-y-6 text-xs text-slate-700 select-text">
-          <!-- Quick Info Cards -->
           <div class="grid grid-cols-3 gap-3">
             <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
               <span class="text-xs text-blue-600 uppercase font-semibold block">Main Status</span>
@@ -365,8 +299,6 @@
               <span id="modal-salary" class="font-medium text-slate-800 text-xs">SAR 2,500.00</span>
             </div>
           </div>
-
-          <!-- Personal Identification Section -->
           <div>
             <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3 flex items-center gap-1.5">
               <i data-lucide="id-card" class="w-4 h-4 text-blue-600"></i> Identity & Documents
@@ -378,8 +310,6 @@
               <div><span class="text-slate-500">Passport Expiry:</span> <span id="modal-passport-exp" class="text-slate-800 block">--</span></div>
             </div>
           </div>
-
-          <!-- Personal Details -->
           <div>
             <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3 flex items-center gap-1.5">
               <i data-lucide="info" class="w-4 h-4 text-blue-600"></i> Personal Information
@@ -391,8 +321,6 @@
               <div><span class="text-slate-500">Gender / Religion:</span> <span id="modal-gender-rel" class="text-slate-800 block">--</span></div>
             </div>
           </div>
-
-          <!-- Project Context -->
           <div>
             <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3 flex items-center gap-1.5">
               <i data-lucide="building-2" class="w-4 h-4 text-blue-600"></i> Assigned Project Context
@@ -403,14 +331,11 @@
             </div>
           </div>
         </div>
-
-        <!-- Modal Footer -->
         <div class="p-4 bg-blue-50 border-t border-blue-100 flex justify-end">
-          <button onclick="closeWorkerModal()" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Close Profile</button>
+          <button onclick="closeModal('worker-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Close Profile</button>
         </div>
       </div>
     </div>
-
     <!-- Extraction Progress Overlay -->
     <div id="extraction-overlay" class="hidden fixed inset-0 bg-blue-900/60 backdrop-blur-sm z-50 flex items-center justify-center">
       <div class="bg-white p-6 rounded-2xl shadow-2xl border border-blue-200 flex flex-col items-center gap-4 max-w-sm">
@@ -421,9 +346,30 @@
           <h3 class="text-sm font-semibold text-slate-900">Extracting Worker Details</h3>
           <p id="extraction-overlay-message" class="text-xs text-slate-500 mt-1">Fetching data from API...</p>
         </div>
+        <button onclick="cancelExtraction()" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Cancel</button>
       </div>
     </div>
-
+    <!-- Clear Cache Confirmation Modal -->
+    <div id="clear-cache-modal" class="hidden fixed inset-0 bg-blue-900/30 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 p-6 max-w-md w-full mx-4">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="trash-2" class="w-5 h-5 text-orange-600"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">Clear Cache</h3>
+            <p class="text-xs text-slate-500">This action cannot be undone</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-600 mb-6 leading-relaxed">
+          This will remove all stored worker details, project summaries, and cached project/contract lists from local storage. You will need to fetch fresh data from the server afterward.
+        </p>
+        <div class="flex justify-end gap-2">
+          <button onclick="closeModal('clear-cache-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Cancel</button>
+          <button onclick="confirmClearCache()" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium text-xs transition-colors">Clear Cache</button>
+        </div>
+      </div>
+    </div>
     <!-- Refresh Confirmation Modal -->
     <div id="refresh-modal" class="hidden fixed inset-0 bg-blue-900/30 backdrop-blur-sm z-50 flex items-center justify-center">
       <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 p-6 max-w-md w-full mx-4">
@@ -436,7 +382,6 @@
             <p class="text-xs text-slate-500">Choose how to refresh the workforce data</p>
           </div>
         </div>
-        
         <div class="space-y-3 mb-6">
           <button onclick="refreshFromCache()" class="w-full flex items-center gap-3 p-3 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left">
             <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
@@ -447,7 +392,6 @@
               <div class="text-[10px] text-slate-500">Load previously saved data from local storage</div>
             </div>
           </button>
-          
           <button onclick="refreshFromAPI()" class="w-full flex items-center gap-3 p-3 rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left">
             <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
               <i data-lucide="cloud" class="w-4 h-4 text-blue-600"></i>
@@ -458,19 +402,94 @@
             </div>
           </button>
         </div>
-        
         <div class="flex justify-end">
-          <button onclick="closeRefreshModal()" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Cancel</button>
+          <button onclick="closeModal('refresh-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <!-- Validation Dashboard Modal -->
+    <div id="validation-modal" class="hidden fixed inset-0 z-50 bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 w-full max-w-3xl max-h-[85vh] flex flex-col">
+        <div class="p-4 bg-blue-600 text-white flex items-center justify-between border-b border-blue-700 select-text">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/30 border border-blue-400/40 rounded-lg text-blue-100">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm">Validation Dashboard</h3>
+              <p class="text-xs text-blue-100">Data quality and expiry risk overview</p>
+            </div>
+          </div>
+          <button onclick="closeModal('validation-modal')" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-5 text-xs text-slate-700">
+          <div id="validation-summary" class="grid grid-cols-3 gap-3"></div>
+          <div>
+            <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3">Expired Documents</h4>
+            <div id="validation-expired-docs" class="space-y-2"></div>
+            <div id="expired-pagination" class="flex items-center justify-between mt-2"></div>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3">Expiring Soon</h4>
+            <div id="validation-expiring-soon" class="space-y-2"></div>
+            <div id="expiring-pagination" class="flex items-center justify-between mt-2"></div>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-900 border-b border-blue-100 pb-1.5 mb-3">Status Distribution</h4>
+            <div id="validation-status-distribution" class="space-y-2"></div>
+          </div>
+        </div>
+        <div class="p-4 bg-blue-50 border-t border-blue-100 flex justify-end">
+          <button onclick="closeModal('validation-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Close</button>
         </div>
       </div>
     </div>
 
+    <!-- No Data Modal -->
+    <div id="no-data-modal" class="hidden fixed inset-0 bg-blue-900/20 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 p-6 max-w-sm w-full mx-4">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="inbox" class="w-5 h-5 text-blue-600"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">No Data to Export</h3>
+            <p class="text-xs text-slate-500">Workbook cannot be generated</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-600 mb-6 leading-relaxed">
+          There are no worker records matching the current filters. Adjust your filters or load data before generating the Excel file.
+        </p>
+        <div class="flex justify-end">
+          <button onclick="closeModal('no-data-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">OK</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // ==================== API SERVICE LAYER ====================
+    // ==================== CONSTANTS ====================
     const API_BASE = 'https://customerportal.smasco.com:5005/api';
-    
+    const STORAGE_KEYS = {
+      CACHE_LAST_UPDATED: 'cacheLastUpdated',
+      ALL_PROJECTS: 'allProjects',
+      ALL_CONTRACTS: 'allContracts',
+      PARALLEL_ENABLED: 'parallelEnabled',
+      THREAD_COUNT: 'threadCount',
+      PAGE_SIZE: 'pageSize',
+      SORT_CONFIG: 'sortConfig',
+      COLLAPSED_CONTRACTS: 'collapsedContracts',
+      COLLAPSED_PROJECTS: 'collapsedProjects',
+      HIDDEN_COLUMNS: 'hiddenColumns',
+      SIDEBAR_COLLAPSED: 'sidebarCollapsed',
+      HIDE_ZERO_WORKER_PROJECTS: 'hideZeroWorkerProjects',
+      CREDENTIALS: 'credentials',
+      AUTH_STATE: 'authState'
+    };
+
+    // ==================== API SERVICE LAYER ====================
     const api = {
       _buildUrl(baseUrl, params = {}) {
         const query = new URLSearchParams();
@@ -484,106 +503,110 @@
       },
 
       async request(url, options = {}) {
-        try {
-          let finalUrl = url;
-          if (options.params) {
-            finalUrl = this._buildUrl(url, options.params);
-            delete options.params;
-          }
-          
-          showStatus(`API Request: ${finalUrl.split('/').pop()}...`, 'loading');
-          
-          const response = await fetch(finalUrl, {
-            ...options,
-            headers: {
-              'Accept': 'application/json, text/plain, */*',
-              'Content-Type': 'application/json',
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              ...options.headers
-            }
-          });
-          
-          if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${response.statusText}. Response: ${text.substring(0, 200)}`);
-          }
-          
-          const data = await response.json();
-          showStatus(`API Success: ${finalUrl.split('/').pop()}`, 'success');
-          return data;
-        } catch (error) {
-          console.error(`API Request Failed [${url}]:`, error);
-          showStatus(`API Failed: ${error.message}`, 'error');
-          throw error;
+        const maxRetries = options.maxRetries !== undefined ? options.maxRetries : 3;
+        const retryDelayMs = options.retryDelayMs || 1000;
+        const timeoutMs = options.timeoutMs || 30000;
+        delete options.maxRetries;
+        delete options.retryDelayMs;
+        delete options.timeoutMs;
+
+        if (state.isOffline || !navigator.onLine) {
+          throw new Error('You are offline. Please check your internet connection.');
         }
+
+        let lastError;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          if (state.activeAbortController && state.activeAbortController.signal) {
+            state.activeAbortController.signal.addEventListener('abort', () => controller.abort(), { once: true });
+          }
+
+          try {
+            let finalUrl = url;
+            if (options.params) {
+              finalUrl = this._buildUrl(url, options.params);
+              delete options.params;
+            }
+            showStatus(`API Request: ${finalUrl.split('/').pop()}... (attempt ${attempt}/${maxRetries})`, 'loading');
+            const response = await fetch(finalUrl, {
+              ...options,
+              signal: controller.signal,
+              headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                ...options.headers
+              }
+            });
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+              const text = await response.text();
+              const error = new Error(`HTTP ${response.status}: ${response.statusText}. Response: ${text.substring(0, 200)}`);
+              error.status = response.status;
+              throw error;
+            }
+            const data = await response.json();
+            showStatus(`API Success: ${finalUrl.split('/').pop()}`, 'success');
+            return data;
+          } catch (error) {
+            clearTimeout(timeoutId);
+            lastError = error;
+            const isAbort = error.name === 'AbortError';
+            const isNetwork = error instanceof TypeError && !error.message.includes('fetch');
+            const shouldRetry = !isAbort && attempt < maxRetries && (isNetwork || (error.status && error.status >= 500));
+            if (shouldRetry) {
+              const delay = retryDelayMs * Math.pow(2, attempt - 1);
+              showStatus(`API retry ${attempt}/${maxRetries} after ${error.message}. Waiting ${delay}ms...`, 'loading');
+              await new Promise(resolve => setTimeout(resolve, delay));
+              continue;
+            }
+            throw error;
+          }
+        }
+        throw lastError;
       },
 
       async login(username, password) {
         const url = `${API_BASE}/Security/Login/`;
         const payload = { username: String(username), password: String(password) };
-        const data = await this.request(url, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        
+        const data = await this.request(url, { method: 'POST', body: JSON.stringify(payload) });
         if (data.statusCode === 200) {
           const token = data.result?.accessToken || '';
-          if (!token) {
-            console.error('[API][Login] Missing accessToken in result:', data.result);
-            throw new Error('Login succeeded but no accessToken in response');
-          }
+          if (!token) throw new Error('Login succeeded but no accessToken in response');
           return token;
         }
-        console.error('[API][Login] Failed. Status:', data.statusCode, 'Message:', data.errorMessage);
         throw new Error(data.errorMessage || `Login failed with status ${data.statusCode}`);
       },
 
       async getUserKey(userId) {
         const url = `${API_BASE}/Security/GetUserKey/`;
-        const data = await this.request(url, {
-          method: 'GET',
-          params: { userID: userId }
-        });
-        
-        if (data.statusCode === 200) {
-          return data.integrationKey || '';
-        }
+        const data = await this.request(url, { method: 'GET', params: { userID: userId } });
+        if (data.statusCode === 200) return data.integrationKey || '';
         throw new Error(data.errorMessage || 'Failed to get user key');
       },
 
       async getContracts(userKey) {
         const url = `${API_BASE}/AxApiServices/GetContractByUser`;
-        const data = await this.request(url, {
-          method: 'GET',
-          params: { userIntegrationKey: userKey }
-        });
+        const data = await this.request(url, { method: 'GET', params: { userIntegrationKey: userKey } });
         return Array.isArray(data) ? data : [];
       },
 
       async getProjects(contractKey) {
         const url = `${API_BASE}/AxApiServices/GetProjectByContract`;
-        const data = await this.request(url, {
-          method: 'GET',
-          params: { contractIntegrationKey: contractKey }
-        });
+        const data = await this.request(url, { method: 'GET', params: { contractIntegrationKey: contractKey } });
         return Array.isArray(data) ? data : [];
       },
 
       async getWorkers(projectKey) {
         const url = `${API_BASE}/AxApiServices/GetWorkersByProjectKey`;
-        const data = await this.request(url, {
-          method: 'GET',
-          params: { projIntegrationKey: projectKey, isHandover: 'false' }
-        });
+        const data = await this.request(url, { method: 'GET', params: { projIntegrationKey: projectKey, isHandover: 'false' } });
         return Array.isArray(data) ? data : [];
       },
 
       async getWorkerDetails(workerKey) {
         const url = `${API_BASE}/AxApiServices/GetWorkerProjectDetails`;
-        const data = await this.request(url, {
-          method: 'GET',
-          params: { workerIntegrationKey: workerKey }
-        });
+        const data = await this.request(url, { method: 'GET', params: { workerIntegrationKey: workerKey } });
         return data || {};
       }
     };
@@ -592,35 +615,24 @@
     function decodeJWT(token) {
       try {
         const parts = token.split('.');
-        if (parts.length !== 3) {
-          throw new Error(`JWT expected 3 segments, got ${parts.length}`);
-        }
-        
+        if (parts.length !== 3) throw new Error(`JWT expected 3 segments, got ${parts.length}`);
         let payload = parts[1];
         const rem = payload.length % 4;
         if (rem > 0) payload += '='.repeat(4 - rem);
-        
-        // Replace URL-safe chars just in case
         payload = payload.replace(/-/g, '+').replace(/_/g, '/');
-        
-        const decoded = JSON.parse(atob(payload));
-        return decoded;
+        return JSON.parse(atob(payload));
       } catch (e) {
-        console.error('[JWT] decode error:', e);
         throw new Error(`JWT decode failed: ${e.message}`);
       }
     }
 
     function extractUserId(payload) {
       if (!payload) return '';
-      // Try common claim names
       const keys = ['UserID', 'UserId', 'userid', 'user_id', 'sub', 'id', 'nameid', 'unique_name'];
       for (const key of keys) {
-        if (payload[key] !== undefined && payload[key] !== null) {
-          return String(payload[key]);
-        }
+        if (payload[key] !== undefined && payload[key] !== null) return String(payload[key]);
       }
-      throw new Error('No UserID field found in JWT payload. Keys available: ' + Object.keys(payload).join(', '));
+      throw new Error('No UserID field found in JWT payload. Keys: ' + Object.keys(payload).join(', '));
     }
 
     // ==================== LOCAL STORAGE SERVICE ====================
@@ -632,19 +644,15 @@
           request.onsuccess = () => resolve(request.result);
           request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            if (!db.objectStoreNames.contains('settings')) {
-              db.createObjectStore('settings', { keyPath: 'key' });
-            }
+            if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
             if (!db.objectStoreNames.contains('workerDetails')) {
-              const workerStore = db.createObjectStore('workerDetails', { keyPath: 'key' });
-              workerStore.createIndex('projectNumber', 'projectNumber', { unique: false });
+              const store = db.createObjectStore('workerDetails', { keyPath: 'key' });
+              store.createIndex('projectNumber', 'projectNumber', { unique: false });
             }
-            if (!db.objectStoreNames.contains('projectSummaries')) {
-              db.createObjectStore('projectSummaries', { keyPath: 'key' });
-            }
+            if (!db.objectStoreNames.contains('projectSummaries')) db.createObjectStore('projectSummaries', { keyPath: 'key' });
             if (!db.objectStoreNames.contains('sessionHistory')) {
-              const sessionStore = db.createObjectStore('sessionHistory', { keyPath: 'id' });
-              sessionStore.createIndex('startedAt', 'startedAt', { unique: false });
+              const store = db.createObjectStore('sessionHistory', { keyPath: 'id' });
+              store.createIndex('startedAt', 'startedAt', { unique: false });
             }
           };
         });
@@ -659,49 +667,48 @@
       async _put(storeName, data) {
         const store = await this._transaction(storeName, 'readwrite');
         return new Promise((resolve, reject) => {
-          const request = store.put(data);
-          request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
+          const req = store.put(data);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
         });
       },
 
       async _get(storeName, key) {
         const store = await this._transaction(storeName);
         return new Promise((resolve, reject) => {
-          const request = store.get(key);
-          request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
         });
       },
 
       async _getAll(storeName) {
         const store = await this._transaction(storeName);
         return new Promise((resolve, reject) => {
-          const request = store.getAll();
-          request.onsuccess = () => resolve(request.result || []);
-          request.onerror = () => reject(request.error);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
         });
       },
 
       async _delete(storeName, key) {
         const store = await this._transaction(storeName, 'readwrite');
         return new Promise((resolve, reject) => {
-          const request = store.delete(key);
-          request.onsuccess = () => resolve();
-          request.onerror = () => reject(request.error);
+          const req = store.delete(key);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
         });
       },
 
       async _clear(storeName) {
         const store = await this._transaction(storeName, 'readwrite');
         return new Promise((resolve, reject) => {
-          const request = store.clear();
-          request.onsuccess = () => resolve();
-          request.onerror = () => reject(request.error);
+          const req = store.clear();
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
         });
       },
 
-      // Settings
       async saveSetting(key, value) {
         return this._put('settings', { key, value, updatedAt: new Date().toISOString() });
       },
@@ -711,18 +718,11 @@
         return result?.value ?? defaultValue;
       },
 
-      // Worker details
       async saveWorkerDetail(projectNum, personnelNum, data) {
         const key = `worker_${projectNum}_${personnelNum}`;
-        const payload = {
-          key,
-          projectNumber: projectNum,
-          personnelNumber: personnelNum,
-          extracted_at: new Date().toISOString(),
-          data: data
-        };
+        const payload = { key, projectNumber: projectNum, personnelNumber: personnelNum, extracted_at: new Date().toISOString(), data };
         const result = await this._put('workerDetails', payload);
-        await this.saveSetting('cacheLastUpdated', new Date().toISOString());
+        await this.saveSetting(STORAGE_KEYS.CACHE_LAST_UPDATED, new Date().toISOString());
         return result;
       },
 
@@ -730,27 +730,15 @@
         const key = `worker_${projectNum}_${personnelNum}`;
         const result = await this._get('workerDetails', key);
         if (!result) return null;
-        
         const extractedDate = new Date(result.extracted_at);
-        const today = new Date();
-        
-        // Check if extracted today
-        if (extractedDate.toDateString() === today.toDateString()) {
-          return result;
-        }
-        return null; // Stale data
+        if (extractedDate.toDateString() === new Date().toDateString()) return result;
+        return null;
       },
 
-      // Project summaries
       async saveProjectSummary(projectNum, data) {
         const key = `summary_${projectNum}`;
-        const result = await this._put('projectSummaries', {
-          key,
-          projectNumber: projectNum,
-          extracted_at: new Date().toISOString(),
-          data: data
-        });
-        await this.saveSetting('cacheLastUpdated', new Date().toISOString());
+        const result = await this._put('projectSummaries', { key, projectNumber: projectNum, extracted_at: new Date().toISOString(), data });
+        await this.saveSetting(STORAGE_KEYS.CACHE_LAST_UPDATED, new Date().toISOString());
         return result;
       },
 
@@ -760,20 +748,17 @@
       },
 
       async saveCredentials(username) {
-        return this._put('settings', { key: 'credentials', value: { username }, updatedAt: new Date().toISOString() });
+        return this.saveSetting(STORAGE_KEYS.CREDENTIALS, { username });
       },
 
       async getCredentials() {
-        const result = await this._get('settings', 'credentials');
-        return result?.value || null;
+        return this.getSetting(STORAGE_KEYS.CREDENTIALS, null);
       },
 
-      // Migration from localStorage
       async migrateFromLocalStorage() {
         try {
           const workerDetails = await this._getAll('workerDetails');
           if (workerDetails.length === 0) {
-            // Try to migrate from localStorage
             for (let i = 0; i < localStorage.length; i++) {
               const key = localStorage.key(i);
               if (key && key.startsWith('smasco_worker_')) {
@@ -785,16 +770,12 @@
                     const projectNum = parts[0];
                     const personnelNum = parts.slice(1).join('_');
                     await this.saveWorkerDetail(projectNum, personnelNum, parsed);
-                  } catch (e) {
-                    console.error('Failed to migrate worker detail:', key, e);
-                  }
+                  } catch (e) { console.error('Migration error:', key, e); }
                 }
               }
             }
           }
-        } catch (e) {
-          console.error('[Storage] Migration failed:', e);
-        }
+        } catch (e) { console.error('[Storage] Migration failed:', e); }
       }
     };
 
@@ -819,64 +800,60 @@
       threadCount: 10,
       selectedWorkerIds: new Set(),
       isExtracting: false,
+      isExporting: false,
+      isCacheOperationInProgress: false,
+      isOffline: false,
       metrics: { fresh: 0, saved: 0, skipped: 0, failed: 0 },
       collapsedContracts: new Set(),
       collapsedProjects: new Set(),
-      hiddenColumns: new Set(),
+      hiddenColumns: new Set(['projectId', 'projectName', 'projectStatus', 'contractNumber', 'contractStartDate', 'contractEndDate', 'availbleStatusName']),
       sidebarCollapsed: false,
-      hideZeroWorkerProjects: false
+      hideZeroWorkerProjects: false,
+      activeAbortController: null,
+      searchDebounceTimer: null,
+      validationExpiredPage: 1,
+      validationExpiringPage: 1
     };
 
     // ==================== SETTINGS PERSISTENCE ====================
     const settings = {
       async load() {
         try {
-          state.parallelEnabled = await storage.getSetting('parallelEnabled', true);
-          state.threadCount = await storage.getSetting('threadCount', 10);
-          state.pageSize = await storage.getSetting('pageSize', 50);
-          state.sortConfig = await storage.getSetting('sortConfig', { key: 'personnelNumber', direction: 'asc' });
-          if (!state.sortConfig || typeof state.sortConfig !== 'object') {
-            state.sortConfig = { key: 'personnelNumber', direction: 'asc' };
-          }
-          state.collapsedContracts = new Set(await storage.getSetting('collapsedContracts', []));
-          state.collapsedProjects = new Set(await storage.getSetting('collapsedProjects', []));
-          state.hiddenColumns = new Set(await storage.getSetting('hiddenColumns', ['projectId', 'projectName', 'projectStatus', 'contractNumber', 'contractStartDate', 'contractEndDate', 'availbleStatusName']));
-          state.sidebarCollapsed = await storage.getSetting('sidebarCollapsed', false);
-          state.hideZeroWorkerProjects = await storage.getSetting('hideZeroWorkerProjects', false);
-          
-          // Update UI controls
+          state.parallelEnabled = await storage.getSetting(STORAGE_KEYS.PARALLEL_ENABLED, true);
+          state.threadCount = await storage.getSetting(STORAGE_KEYS.THREAD_COUNT, 10);
+          state.pageSize = await storage.getSetting(STORAGE_KEYS.PAGE_SIZE, 50);
+          state.sortConfig = await storage.getSetting(STORAGE_KEYS.SORT_CONFIG, { key: 'personnelNumber', direction: 'asc' });
+          if (!state.sortConfig || typeof state.sortConfig !== 'object') state.sortConfig = { key: 'personnelNumber', direction: 'asc' };
+          state.collapsedContracts = new Set(await storage.getSetting(STORAGE_KEYS.COLLAPSED_CONTRACTS, []));
+          state.collapsedProjects = new Set(await storage.getSetting(STORAGE_KEYS.COLLAPSED_PROJECTS, []));
+          state.hiddenColumns = new Set(await storage.getSetting(STORAGE_KEYS.HIDDEN_COLUMNS, ['projectId', 'projectName', 'projectStatus', 'contractNumber', 'contractStartDate', 'contractEndDate', 'availbleStatusName']));
+          state.sidebarCollapsed = await storage.getSetting(STORAGE_KEYS.SIDEBAR_COLLAPSED, false);
+          state.hideZeroWorkerProjects = await storage.getSetting(STORAGE_KEYS.HIDE_ZERO_WORKER_PROJECTS, false);
+
           const chkParallel = document.getElementById('chk-parallel');
           const sliderThreads = document.getElementById('slider-threads');
           const threadCountDisp = document.getElementById('thread-count-disp');
           const pageSizeSelect = document.getElementById('page-size-select');
-          
           if (chkParallel) chkParallel.checked = state.parallelEnabled;
           if (sliderThreads) sliderThreads.value = state.threadCount;
           if (threadCountDisp) threadCountDisp.innerText = state.threadCount;
           if (pageSizeSelect) pageSizeSelect.value = state.pageSize;
-          
-          if (state.sidebarCollapsed) {
-            toggleSidebar();
-          }
-        } catch (e) {
-          console.error('[Settings] Failed to load settings:', e);
-        }
+          if (state.sidebarCollapsed) toggleSidebar();
+        } catch (e) { handleError(e, 'Settings load'); }
       },
 
       async save() {
         try {
-          await storage.saveSetting('parallelEnabled', state.parallelEnabled);
-          await storage.saveSetting('threadCount', state.threadCount);
-          await storage.saveSetting('pageSize', state.pageSize);
-          await storage.saveSetting('sortConfig', state.sortConfig);
-          await storage.saveSetting('collapsedContracts', Array.from(state.collapsedContracts));
-          await storage.saveSetting('collapsedProjects', Array.from(state.collapsedProjects));
-          await storage.saveSetting('hiddenColumns', Array.from(state.hiddenColumns));
-          await storage.saveSetting('sidebarCollapsed', state.sidebarCollapsed);
-          await storage.saveSetting('hideZeroWorkerProjects', state.hideZeroWorkerProjects);
-        } catch (e) {
-          console.error('[Settings] Failed to save settings:', e);
-        }
+          await storage.saveSetting(STORAGE_KEYS.PARALLEL_ENABLED, state.parallelEnabled);
+          await storage.saveSetting(STORAGE_KEYS.THREAD_COUNT, state.threadCount);
+          await storage.saveSetting(STORAGE_KEYS.PAGE_SIZE, state.pageSize);
+          await storage.saveSetting(STORAGE_KEYS.SORT_CONFIG, state.sortConfig);
+          await storage.saveSetting(STORAGE_KEYS.COLLAPSED_CONTRACTS, Array.from(state.collapsedContracts));
+          await storage.saveSetting(STORAGE_KEYS.COLLAPSED_PROJECTS, Array.from(state.collapsedProjects));
+          await storage.saveSetting(STORAGE_KEYS.HIDDEN_COLUMNS, Array.from(state.hiddenColumns));
+          await storage.saveSetting(STORAGE_KEYS.SIDEBAR_COLLAPSED, state.sidebarCollapsed);
+          await storage.saveSetting(STORAGE_KEYS.HIDE_ZERO_WORKER_PROJECTS, state.hideZeroWorkerProjects);
+        } catch (e) { handleError(e, 'Settings save'); }
       },
 
       async clear() {
@@ -884,13 +861,1452 @@
           await storage._clear('settings');
           await storage._clear('workerDetails');
           await storage._clear('projectSummaries');
-        } catch (e) {
-          console.error('[Settings] Failed to clear settings:', e);
-        }
+        } catch (e) { handleError(e, 'Settings clear'); }
       }
     };
 
-    // Columns Definition
+    // ==================== HELPER FUNCTIONS ====================
+    function handleError(error, context = 'App') {
+      console.error(`[${context}]`, error);
+      showStatus(`${context} failed: ${error.message}`, 'error');
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    function toggleModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function setButtonState(btnId, options = {}) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const { disabled, label, iconSpin } = options;
+      if (disabled !== undefined) btn.disabled = disabled;
+      if (label) {
+        const labelSpan = btn.querySelector('span:last-child') || btn.querySelector('span');
+        if (labelSpan) labelSpan.innerText = label;
+      }
+      // Find icon - try data-lucide first, then svg, then fallback to first child with class
+      const icon = btn.querySelector('[data-lucide]') || 
+                   btn.querySelector('svg') || 
+                   btn.querySelector('i[class*="lucide"]');
+      if (iconSpin !== undefined) {
+        if (iconSpin) {
+          icon?.classList.add('animate-spin');
+        } else {
+          icon?.classList.remove('animate-spin');
+        }
+      }
+    }
+
+    // Debounce utility
+    function debounce(func, delay) {
+      return function(...args) {
+        clearTimeout(state.searchDebounceTimer);
+        state.searchDebounceTimer = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // ==================== OFFLINE MODE ====================
+    function updateOfflineUI(isOffline) {
+      state.isOffline = isOffline;
+      const banner = document.getElementById('offline-banner');
+      const btnRefresh = document.getElementById('btn-refresh');
+      const btnConnect = document.getElementById('btn-connect');
+      if (banner) banner.classList.toggle('hidden', !isOffline);
+      if (btnRefresh) btnRefresh.disabled = isOffline || state.isExtracting;
+      if (btnConnect) btnConnect.disabled = isOffline;
+      if (isOffline) {
+        showStatus('You are offline. Using cached data.', 'info');
+      }
+    }
+
+    function initOfflineMode() {
+      updateOfflineUI(!navigator.onLine);
+      window.addEventListener('online', () => updateOfflineUI(false));
+      window.addEventListener('offline', () => updateOfflineUI(true));
+
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          const CACHE_NAME = 'smasco-workforce-v1';
+          const ASSETS = [self.registration.scope];
+          self.addEventListener('install', (event) => {
+            event.waitUntil(
+              caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+            );
+            self.skipWaiting();
+          });
+          self.addEventListener('activate', (event) => {
+            event.waitUntil(self.clients.claim());
+          });
+          self.addEventListener('fetch', (event) => {
+            if (event.request.method !== 'GET') return;
+            event.respondWith(
+              fetch(event.request).catch(() => caches.match(event.request))
+            );
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(() => {
+          // Service worker registration failed; offline mode still works via IndexedDB cache.
+        });
+      }
+    }
+
+    // ==================== VALIDATION DASHBOARD ====================
+    function openValidationDashboard() {
+      if (!state.workers.length) {
+        showStatus('No worker data available for validation.', 'error');
+        return;
+      }
+      state.validationExpiredPage = 1;
+      state.validationExpiringPage = 1;
+      renderValidationDashboard();
+      openModal('validation-modal');
+    }
+
+    function renderValidationDashboard() {
+      const workers = state.workers;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      const expiredDocs = [];
+      const expiringSoon = [];
+      const statusCounts = {};
+
+      workers.forEach(w => {
+        if (w.passportExpirationDate) {
+          const expiry = new Date(w.passportExpirationDate);
+          const diff = Math.ceil((expiry - today) / oneDay);
+          if (diff < 0) expiredDocs.push({ worker: w, type: 'Passport', days: diff, expiryDate: w.passportExpirationDate });
+          else if (diff <= 30) expiringSoon.push({ worker: w, type: 'Passport', days: diff, expiryDate: w.passportExpirationDate });
+        }
+        if (w.iqamaExpiryDate) {
+          const expiry = new Date(w.iqamaExpiryDate);
+          const diff = Math.ceil((expiry - today) / oneDay);
+          if (diff < 0) expiredDocs.push({ worker: w, type: 'Iqama', days: diff, expiryDate: w.iqamaExpiryDate });
+          else if (diff <= 30) expiringSoon.push({ worker: w, type: 'Iqama', days: diff, expiryDate: w.iqamaExpiryDate });
+        }
+
+        const status = String(w.mainStatusName || 'Unknown').trim();
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+
+      expiredDocs.sort((a, b) => b.days - a.days);
+      expiringSoon.sort((a, b) => a.days - b.days);
+
+      const summaryEl = document.getElementById('validation-summary');
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+            <div class="text-xs text-blue-600 uppercase font-semibold">Total Workers</div>
+            <div class="text-lg font-bold text-slate-900">${workers.length}</div>
+          </div>
+          <div class="bg-red-50 p-3 rounded-lg border border-red-100">
+            <div class="text-xs text-red-600 uppercase font-semibold">Expired Documents</div>
+            <div class="text-lg font-bold text-slate-900">${expiredDocs.length}</div>
+          </div>
+          <div class="bg-amber-50 p-3 rounded-lg border border-amber-100">
+            <div class="text-xs text-amber-600 uppercase font-semibold">Expiring Soon</div>
+            <div class="text-lg font-bold text-slate-900">${expiringSoon.length}</div>
+          </div>
+        `;
+      }
+
+      const PAGE_SIZE = 10;
+      const renderPagination = (containerId, total, page, onPageChange) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (total === 0) {
+          container.innerHTML = '';
+          return;
+        }
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        if (page > totalPages) page = totalPages;
+        container.innerHTML = `
+          <span class="text-[10px] text-slate-500">Page ${page} of ${totalPages}</span>
+          <div class="flex items-center gap-1">
+            <button onclick="${onPageChange}(${page - 1})" ${page <= 1 ? 'disabled' : ''} class="px-2 py-1 rounded border border-blue-200 text-[10px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50">Prev</button>
+            <button onclick="${onPageChange}(${page + 1})" ${page >= totalPages ? 'disabled' : ''} class="px-2 py-1 rounded border border-blue-200 text-[10px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50">Next</button>
+          </div>
+        `;
+      };
+
+      const renderDocItems = (items, page) => {
+        const start = (page - 1) * PAGE_SIZE;
+        return items.slice(start, start + PAGE_SIZE).map(item => {
+          const expiry = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A';
+          return `
+            <div class="flex items-center justify-between bg-white border border-blue-100 rounded-lg px-3 py-2">
+              <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-slate-900">${item.worker.personnelNumber}</span>
+                  <span class="text-xs text-slate-600">${item.worker.workerName || ''}</span>
+                </div>
+                <span class="text-[10px] text-slate-500">Expired: ${expiry}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] uppercase font-semibold ${item.type === 'Passport' ? 'text-red-600' : 'text-red-600'}">${item.type}</span>
+                <span class="text-xs font-mono font-medium text-red-700">${Math.abs(item.days)}d ago</span>
+                <button onclick="openWorkerModal(state.workers.find(w => w.personnelNumber === '${item.worker.personnelNumber}'))" class="text-[10px] bg-red-50 text-red-700 border border-red-200 rounded px-2 py-1 hover:bg-red-100">View</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      const renderExpiringItems = (items, page) => {
+        const start = (page - 1) * PAGE_SIZE;
+        return items.slice(start, start + PAGE_SIZE).map(item => {
+          const expiry = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A';
+          return `
+            <div class="flex items-center justify-between bg-white border border-blue-100 rounded-lg px-3 py-2">
+              <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-slate-900">${item.worker.personnelNumber}</span>
+                  <span class="text-xs text-slate-600">${item.worker.workerName || ''}</span>
+                </div>
+                <span class="text-[10px] text-slate-500">Expires: ${expiry}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] uppercase font-semibold text-amber-600">${item.type}</span>
+                <span class="text-xs font-mono font-medium text-amber-700">${item.days}d</span>
+                <button onclick="openWorkerModal(state.workers.find(w => w.personnelNumber === '${item.worker.personnelNumber}'))" class="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 rounded px-2 py-1 hover:bg-amber-100">View</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      const expiredEl = document.getElementById('validation-expired-docs');
+      if (expiredEl) {
+        if (expiredDocs.length === 0) {
+          expiredEl.innerHTML = '<p class="text-xs text-slate-500">No expired documents found.</p>';
+        } else {
+          const page = state.validationExpiredPage || 1;
+          expiredEl.innerHTML = renderDocItems(expiredDocs, page);
+          renderPagination('expired-pagination', expiredDocs.length, page, 'changeExpiredPage');
+        }
+      }
+
+      const expiringEl = document.getElementById('validation-expiring-soon');
+      if (expiringEl) {
+        if (expiringSoon.length === 0) {
+          expiringEl.innerHTML = '<p class="text-xs text-slate-500">No documents expiring within 30 days.</p>';
+        } else {
+          const page = state.validationExpiringPage || 1;
+          expiringEl.innerHTML = renderExpiringItems(expiringSoon, page);
+          renderPagination('expiring-pagination', expiringSoon.length, page, 'changeExpiringPage');
+        }
+      }
+
+      const statusEl = document.getElementById('validation-status-distribution');
+      if (statusEl) {
+        const sorted = Object.entries(statusCounts).sort((a, b) => b[1] - a[1]);
+        statusEl.innerHTML = sorted.map(([status, count]) => `
+          <div class="flex items-center justify-between bg-white border border-blue-100 rounded-lg px-3 py-2">
+            <span class="text-xs text-slate-700">${status}</span>
+            <span class="text-xs font-mono font-medium text-slate-900">${count}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function changeExpiredPage(page) {
+      state.validationExpiredPage = page;
+      renderValidationDashboard();
+    }
+
+    function changeExpiringPage(page) {
+      state.validationExpiringPage = page;
+      renderValidationDashboard();
+    }
+
+    // ==================== MODAL & EXTRACTION CONTROLS ====================
+    function showExtractionOverlay(message = 'Fetching worker details...') {
+      const msgEl = document.getElementById('extraction-overlay-message');
+      if (msgEl) msgEl.innerText = message;
+      openModal('extraction-overlay');
+    }
+
+    function updateExtractionOverlay(message) {
+      const msgEl = document.getElementById('extraction-overlay-message');
+      if (msgEl) msgEl.innerText = message;
+    }
+
+    function hideExtractionOverlay() {
+      closeModal('extraction-overlay');
+    }
+
+    function showRefreshModal() {
+      openModal('refresh-modal');
+    }
+
+    // ==================== AUTHENTICATION ====================
+    async function handleConnect() {
+      const username = document.getElementById('auth-username').value;
+      const password = document.getElementById('auth-password').value;
+      if (!username || !password) {
+        showStatus('Please enter username and password', 'error');
+        return;
+      }
+      try {
+        showExtractionOverlay('Authenticating...');
+        showStatus('Authenticating with SMASCO API...', 'loading');
+        const token = await api.login(username, password);
+        if (!token) throw new Error('No token received from API');
+        state.authToken = token;
+        state.isAuthenticated = true;
+        updateExtractionOverlay('Getting user profile...');
+        const jwtPayload = decodeJWT(token);
+        state.userId = extractUserId(jwtPayload);
+        if (!state.userId) throw new Error('Could not extract UserID from token');
+        updateExtractionOverlay('Getting user key...');
+        state.userKey = await api.getUserKey(state.userId);
+        if (!state.userKey) throw new Error('Could not get user integration key');
+        await storage.saveCredentials(username);
+        await storage.saveSetting(STORAGE_KEYS.AUTH_STATE, {
+          isAuthenticated: true,
+          userId: state.userId,
+          userKey: state.userKey,
+          authToken: state.authToken
+        });
+
+        document.getElementById('auth-overlay').classList.add('hidden');
+        document.getElementById('auth-unconnected-form').classList.add('hidden');
+        document.getElementById('auth-connected-badge').classList.remove('hidden');
+        setButtonState('btn-refresh', { disabled: false });
+        setButtonState('btn-export', { disabled: false });
+        setButtonState('btn-validate', { disabled: false });
+
+        const creds = await storage.getCredentials().catch(() => null);
+        document.getElementById('connected-username').innerText = creds?.username ? `@${creds.username} ` : '';
+
+        showStatus('Loading cached data...', 'loading');
+        updateExtractionOverlay('Loading cached data...');
+        await loadCachedData();
+        if (state.workers.length === 0) {
+          showStatus('No cached data found. Fetching from API...', 'loading');
+          await loadData();
+          if (state.workers.length > 0 && state.isAuthenticated) {
+            await triggerExtraction(true);
+          } else {
+            hideExtractionOverlay();
+          }
+        } else {
+          hideExtractionOverlay();
+        }
+        updateCacheIndicator();
+        showStatus(`Connected.`, 'success');
+      } catch (error) {
+        hideExtractionOverlay();
+        handleError(error, 'Authentication');
+        state.isAuthenticated = false;
+      }
+    }
+
+    function handleDisconnect() {
+      if (state.activeAbortController) {
+        state.activeAbortController.abort();
+        state.activeAbortController = null;
+      }
+      state.isAuthenticated = false;
+      state.authToken = null;
+      state.userId = null;
+      state.userKey = null;
+      state.contracts = [];
+      state.projects = [];
+      state.workers = [];
+      state.isExtracting = false;
+
+      document.getElementById('auth-overlay').classList.remove('hidden');
+      document.getElementById('auth-unconnected-form').classList.remove('hidden');
+      document.getElementById('auth-connected-badge').classList.add('hidden');
+      setButtonState('btn-refresh', { disabled: true });
+      setButtonState('btn-export', { disabled: true });
+      setButtonState('btn-validate', { disabled: true });
+      document.getElementById('status-bar').classList.add('hidden');
+
+      renderTreeSidebar();
+      renderTableHeader();
+      renderTableData();
+      renderHeaderStats();
+      storage._delete('settings', STORAGE_KEYS.AUTH_STATE).catch(() => {});
+    }
+
+    // ==================== DATA FETCHING HELPERS ====================
+    async function fetchWorkersForProject(project) {
+      if (!project.integrationKey) {
+        console.warn('[fetchWorkersForProject] Missing integrationKey', project.projectNumber);
+        return [];
+      }
+      try {
+        return await api.getWorkers(project.integrationKey);
+      } catch (error) {
+        handleError(error, `fetchWorkersForProject (${project.projectNumber})`);
+        return [];
+      }
+    }
+
+    // ==================== DATA LOADING ====================
+    async function loadCachedData() {
+      if (state.isCacheOperationInProgress) return;
+      state.isCacheOperationInProgress = true;
+      try {
+        showStatus('Loading cached data...', 'loading');
+        updateExtractionOverlay('Loading cached data...');
+        const allWorkers = [];
+        const projectsMap = new Map();
+        const contractsMap = new Map();
+
+        const cachedProjects = await storage.getSetting(STORAGE_KEYS.ALL_PROJECTS, []);
+        const cachedContracts = await storage.getSetting(STORAGE_KEYS.ALL_CONTRACTS, []);
+        if (cachedProjects.length > 0) {
+          state.projects = cachedProjects;
+          state.contracts = cachedContracts;
+        }
+
+        const summaries = await storage._getAll('projectSummaries');
+        for (const summary of summaries) {
+          if (!summary.data || !Array.isArray(summary.data)) continue;
+          const projectNum = summary.projectNumber || summary.key?.replace('summary_', '');
+          if (!projectNum) continue;
+          for (const worker of summary.data) {
+            const personnelNum = worker.personnelNumber;
+            if (!personnelNum) continue;
+            const detail = await storage.getWorkerDetail(projectNum, personnelNum);
+            if (detail && detail.data) {
+              const rawRecord = extractFirstWorkerRecord(detail.data);
+              const normalized = normalizeWorkerDetail(rawRecord);
+              if (normalized) {
+                allWorkers.push({
+                  ...normalized,
+                  projectId: normalized.projectId || projectNum,
+                  projectName: normalized.projectName || worker.projectName || '',
+                  projectStatus: normalized.projectStatus || worker.projectStatus || '',
+                  contractNumber: normalized.contractNumber || worker.contractNumber || '',
+                  extractionStatus: 'Fresh',
+                  extractedAt: detail.extracted_at
+                });
+              }
+            } else {
+              allWorkers.push({
+                ...worker,
+                projectId: worker.projectId || projectNum,
+                projectName: worker.projectName || '',
+                projectStatus: worker.projectStatus || '',
+                contractNumber: worker.contractNumber || '',
+                extractionStatus: 'Pending',
+                extractedAt: null
+              });
+            }
+          }
+          if (cachedProjects.length === 0 && summary.data.length > 0) {
+            const firstWorker = summary.data[0];
+            projectsMap.set(projectNum, {
+              projectNumber: projectNum,
+              projectName: firstWorker.projectName || '',
+              statusName: firstWorker.projectStatus || '',
+              integrationKey: '',
+              contractNumber: firstWorker.contractNumber || ''
+            });
+          }
+        }
+
+        if (cachedProjects.length === 0) {
+          for (const project of projectsMap.values()) {
+            if (project.contractNumber && !contractsMap.has(project.contractNumber)) {
+              contractsMap.set(project.contractNumber, {
+                contractNumber: project.contractNumber,
+                contractName: '',
+                integrationKey: ''
+              });
+            }
+          }
+          state.projects = Array.from(projectsMap.values());
+          state.contracts = Array.from(contractsMap.values());
+        }
+
+        state.workers = allWorkers;
+        state.workers.forEach(recalculateValidityDays);
+
+        renderHeaderStats();
+        renderTableHeader();
+        renderTreeSidebar();
+        renderTableData();
+        populateMainStatusFilter();
+        updateCacheIndicator();
+
+        if (state.workers.length > 0) {
+          showStatus(`Loaded ${state.workers.length} workers from cache.`, 'success');
+        } else {
+          showStatus('No cached data found. Click Refresh All to fetch from API.', 'info');
+        }
+      } catch (error) {
+        handleError(error, 'Cache load');
+      } finally {
+        state.isCacheOperationInProgress = false;
+      }
+    }
+
+    async function loadData() {
+      try {
+        showStatus('Fetching contracts...', 'loading');
+        state.contracts = await api.getContracts(state.userKey);
+        showStatus(`Found ${state.contracts.length} contracts`, 'success');
+
+        showStatus('Fetching projects...', 'loading');
+        const allProjects = [];
+        for (const contract of state.contracts) {
+          const projects = await api.getProjects(contract.integrationKey);
+          projects.forEach(p => {
+            allProjects.push({
+              ...p,
+              contractNumber: contract.contractNumber,
+              contractName: contract.contractName
+            });
+          });
+        }
+        state.projects = allProjects;
+        showStatus(`Found ${state.projects.length} projects`, 'success');
+
+        showStatus('Fetching workers...', 'loading');
+        const allWorkers = [];
+        for (const project of state.projects) {
+          const workers = await fetchWorkersForProject(project);
+          if (Array.isArray(workers) && workers.length > 0 && workers[0].personnelNumber !== null) {
+            const enrichedWorkers = workers.map(w => ({
+              ...w,
+              projectId: project.projectNumber,
+              projectName: project.projectName,
+              projectStatus: project.statusName,
+              contractNumber: project.contractNumber
+            }));
+            await storage.saveProjectSummary(project.projectNumber, enrichedWorkers);
+            enrichedWorkers.forEach(w => {
+              allWorkers.push({
+                ...w,
+                extractionStatus: 'Pending',
+                extractedAt: null
+              });
+            });
+          }
+        }
+        state.workers = allWorkers;
+        state.workers.forEach(recalculateValidityDays);
+        showStatus(`Found ${state.workers.length} workers. Ready for extraction.`, 'success');
+
+        await storage.saveSetting(STORAGE_KEYS.ALL_PROJECTS, state.projects);
+        await storage.saveSetting(STORAGE_KEYS.ALL_CONTRACTS, state.contracts);
+        await storage.saveSetting(STORAGE_KEYS.CACHE_LAST_UPDATED, new Date().toISOString());
+
+        renderHeaderStats();
+        renderTreeSidebar();
+        renderTableData();
+        populateMainStatusFilter();
+      } catch (error) {
+        handleError(error, 'Data load');
+        throw error;
+      }
+    }
+
+    // ==================== DATA NORMALIZATION ====================
+    function normalizeWorkerDetail(raw) {
+      if (!raw || typeof raw !== 'object') return raw;
+      const project = raw.project && typeof raw.project === 'object' ? raw.project : {};
+      const nationality = raw.nationality || raw.country || '';
+      const result = { ...raw, nationality };
+      if (project.projectNumber || raw.projectId) result.projectId = project.projectNumber || raw.projectId;
+      if (project.projectName || raw.projectName) result.projectName = project.projectName || raw.projectName;
+      if (project.statusName || raw.projectStatus) result.projectStatus = project.statusName || raw.projectStatus;
+      if (project.contractNumber || raw.contractNumber) result.contractNumber = project.contractNumber || raw.contractNumber;
+      if (raw.workerIntegrationKey) result.workerIntegrationKey = raw.workerIntegrationKey;
+      return result;
+    }
+
+    function extractFirstWorkerRecord(details) {
+      if (!details || typeof details !== 'object') return null;
+      if (Array.isArray(details)) return details[0] || null;
+      if (Array.isArray(details.data)) return details.data[0] || null;
+      if (details.data && typeof details.data === 'object') return details.data;
+      return details;
+    }
+
+    function formatDate(value) {
+      if (!value) return '--';
+      const str = String(value);
+      if (str.includes('T')) return str.split('T')[0];
+      return str;
+    }
+
+    function recalculateValidityDays(worker) {
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (worker.passportExpirationDate) {
+        const expiry = new Date(worker.passportExpirationDate);
+        const diff = Math.ceil((expiry - today) / oneDayMs);
+        worker.passportValidity = isNaN(diff) ? worker.passportValidity : diff + 1;
+      }
+      if (worker.iqamaExpiryDate) {
+        const expiry = new Date(worker.iqamaExpiryDate);
+        const diff = Math.ceil((expiry - today) / oneDayMs);
+        worker.iqamaValidity = isNaN(diff) ? worker.iqamaValidity : diff + 1;
+      }
+    }
+
+    // ==================== EXTRACTION PIPELINE ====================
+    async function triggerExtraction(forceRefresh = false) {
+      if (!state.isAuthenticated || state.isExtracting) return;
+      if (state.activeAbortController) {
+        state.activeAbortController.abort();
+      }
+      const sessionController = new AbortController();
+      state.activeAbortController = sessionController;
+      state.isExtracting = true;
+      setButtonState('btn-refresh', { disabled: true, label: 'Extracting...', iconSpin: true });
+
+      showExtractionOverlay('Fetching worker details...');
+      renderHeaderStats();
+      renderTreeSidebar();
+      renderTableData();
+
+      let fresh = 0, saved = 0, skipped = 0, failed = 0;
+
+      try {
+        const validProjects = state.projects.filter(p => p.integrationKey);
+        showStatus(`Fetching worker lists for ${validProjects.length} projects...`, 'loading');
+        updateExtractionOverlay(`Fetching worker lists for ${validProjects.length} projects...`);
+
+        const projectWorkerLists = await Promise.all(validProjects.map(project =>
+          fetchWorkersForProject(project).then(workers => ({ project, workers }))
+        ));
+
+        let processedProjects = 0;
+        for (const { project, workers } of projectWorkerLists) {
+          if (sessionController.signal.aborted) throw new Error('Extraction cancelled by user');
+          processedProjects++;
+          showStatus(`Processing project ${project.projectNumber} (${processedProjects}/${validProjects.length})...`, 'loading');
+          updateExtractionOverlay(`Processing project ${project.projectNumber} (${processedProjects}/${validProjects.length})...`);
+
+          if (!Array.isArray(workers) || workers.length === 0 || workers[0].personnelNumber === null) continue;
+
+          const pendingWorkers = [];
+          for (const worker of workers) {
+            const personnelNum = worker.personnelNumber;
+            const workerKey = worker.workerIntegrationKey;
+            if (!personnelNum || !workerKey) { failed++; continue; }
+
+            const target = state.workers.find(w => w.personnelNumber === personnelNum);
+            if (!target) {
+              const newTarget = {
+                ...worker,
+                projectId: project.projectNumber,
+                projectName: project.projectName,
+                projectStatus: project.statusName,
+                contractNumber: project.contractNumber,
+                extractionStatus: 'Pending',
+                extractedAt: null
+              };
+              state.workers.push(newTarget);
+              pendingWorkers.push({ project, worker, target: newTarget, personnelNum, workerKey });
+              continue;
+            }
+
+            if (!forceRefresh) {
+              const existing = await storage.getWorkerDetail(project.projectNumber, personnelNum);
+              if (existing) {
+                skipped++;
+                const normalized = normalizeWorkerDetail(existing.data?.[0] || existing.data || existing);
+                target.extractionStatus = 'Fresh';
+                target.extractedAt = existing.extracted_at;
+                if (normalized) Object.assign(target, normalized);
+                continue;
+              }
+            }
+            pendingWorkers.push({ project, worker, target, personnelNum, workerKey });
+          }
+
+          if (pendingWorkers.length === 0) continue;
+
+          const processBatch = async (items) => {
+            await Promise.all(items.map(item => processWorkerItem(item)));
+            state.workers.forEach(recalculateValidityDays);
+            renderTableData();
+          };
+
+          if (state.parallelEnabled) {
+            const batchSize = Math.max(1, state.threadCount || 1);
+            for (let i = 0; i < pendingWorkers.length; i += batchSize) {
+              if (sessionController.signal.aborted) throw new Error('Extraction cancelled by user');
+              await processBatch(pendingWorkers.slice(i, i + batchSize));
+            }
+          } else {
+            for (const item of pendingWorkers) {
+              if (sessionController.signal.aborted) throw new Error('Extraction cancelled by user');
+              await processWorkerItem(item);
+              recalculateValidityDays(item.target);
+              renderTableData();
+            }
+          }
+        }
+
+        state.metrics = { fresh, saved, skipped, failed };
+        showStatus(`Extraction complete.`, 'success');
+      } catch (error) {
+        if (error.message !== 'Extraction cancelled by user') {
+          handleError(error, 'Extraction');
+        }
+      } finally {
+        state.isExtracting = false;
+        state.activeAbortController = null;
+        setButtonState('btn-refresh', { disabled: false, label: 'Refresh All', iconSpin: false });
+        hideExtractionOverlay();
+        state.workers.forEach(recalculateValidityDays);
+        renderHeaderStats();
+        renderTreeSidebar();
+        renderTableData();
+        updateCacheIndicator();
+        populateMainStatusFilter();
+      }
+    }
+
+    async function processWorkerItem({ project, worker, target, personnelNum, workerKey }) {
+      try {
+        const details = await api.getWorkerDetails(workerKey);
+        await storage.saveWorkerDetail(project.projectNumber, personnelNum, details);
+        const rawRecord = extractFirstWorkerRecord(details);
+        let hasData = false;
+        if (rawRecord && typeof rawRecord === 'object' && !Array.isArray(rawRecord)) {
+          hasData = Object.values(rawRecord).some(v => v !== '' && v !== null && v !== undefined);
+        }
+        const normalized = hasData ? normalizeWorkerDetail(rawRecord) : null;
+        if (normalized) {
+          target.extractionStatus = 'Saved';
+          target.extractedAt = new Date().toISOString();
+          Object.assign(target, normalized);
+          state.metrics.saved = (state.metrics.saved || 0) + 1;
+        } else {
+          target.extractionStatus = 'Failed';
+          target.extractedAt = new Date().toISOString();
+          state.metrics.failed = (state.metrics.failed || 0) + 1;
+        }
+      } catch (error) {
+        target.extractionStatus = 'Failed';
+        target.extractedAt = new Date().toISOString();
+        state.metrics.failed = (state.metrics.failed || 0) + 1;
+        console.error(`[Extraction] Failed for ${personnelNum}:`, error);
+      }
+    }
+
+    function cancelExtraction() {
+      if (state.activeAbortController) {
+        state.activeAbortController.abort();
+        state.activeAbortController = null;
+      }
+      state.isExtracting = false;
+      setButtonState('btn-refresh', { disabled: false, label: 'Refresh All', iconSpin: false });
+      hideExtractionOverlay();
+      showStatus('Extraction cancelled.', 'info');
+    }
+
+    // ==================== GRID FILTERS & RENDER ====================
+    function applyFiltersAndRender() {
+      // Read all filter inputs and update state
+      const gridSearch = document.getElementById('grid-search');
+      const jobFilter = document.getElementById('job-profession-filter');
+      const statusFilter = document.getElementById('main-status-filter');
+      if (gridSearch) state.gridSearch = gridSearch.value;
+      if (jobFilter) state.jobProfessionFilter = jobFilter.value;
+      if (statusFilter) state.mainStatusFilter = statusFilter.value;
+      state.currentPage = 1;
+      renderTableData();
+    }
+
+    // Individual filter handlers now call the unified function
+    function handleGridSearch(val) {
+      state.gridSearch = val;
+      state.currentPage = 1;
+      renderTableData();
+    }
+
+    function handleJobProfessionFilter(val) {
+      state.jobProfessionFilter = val;
+      state.currentPage = 1;
+      renderTableData();
+    }
+
+    function handleMainStatusFilter(val) {
+      state.mainStatusFilter = val;
+      state.currentPage = 1;
+      renderTableData();
+    }
+
+    // Debounced tree search
+    const handleTreeSearch = debounce(function(val) {
+      state.treeSearch = val.toLowerCase();
+      renderTreeSidebar();
+    }, 300);
+
+    function resetFilters() {
+      document.getElementById('grid-search').value = '';
+      document.getElementById('tree-search').value = '';
+      const jobFilter = document.getElementById('job-profession-filter');
+      const statusFilter = document.getElementById('main-status-filter');
+      if (jobFilter) jobFilter.value = '';
+      if (statusFilter) statusFilter.value = '';
+      state.gridSearch = '';
+      state.jobProfessionFilter = '';
+      state.mainStatusFilter = '';
+      state.selectedScope = { type: 'ALL', id: null };
+      state.treeSearch = '';
+      state.currentPage = 1;
+      renderTreeSidebar();
+      renderTableData();
+    }
+
+    // ==================== EXPORT ====================
+    function buildExportData() {
+      const dataset = getFilteredAndSortedWorkers();
+      if (!dataset.length) return null;
+      const dateKeys = new Set(['dateOfBirth', 'dateOfJoin', 'passportExpirationDate', 'iqamaExpiryDate', 'contractStartDate', 'contractEndDate']);
+      const visibleColumns = gridColumns.filter(col => col.key === 'index' || !state.hiddenColumns.has(col.key));
+      return dataset.map((worker, idx) => {
+        const row = { '#': idx + 1 };
+        visibleColumns.forEach(col => {
+          if (col.key === 'index') return;
+          const value = worker[col.key] ?? '';
+          row[col.label] = dateKeys.has(col.key) ? formatDate(value) : value;
+        });
+        return row;
+      });
+    }
+
+    async function exportToExcel() {
+      if (state.isExporting) return;
+      state.isExporting = true;
+      setButtonState('btn-export', { disabled: true, label: 'Generating...', iconSpin: true });
+
+      try {
+        // Use setTimeout to allow UI to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const exportData = buildExportData();
+        if (!exportData) {
+          openModal('no-data-modal');
+          return;
+        }
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Master Worker Data');
+        const maxWidth = 50;
+        ws.columns = Object.keys(exportData[0]).map(key => ({
+          width: Math.min(maxWidth, Math.max(key.length, ...exportData.map(row => String(row[key] || '').length)) + 2)
+        }));
+        const date = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `smasco_master_workers_${date}.xlsx`);
+
+        showStatus(`Exported ${exportData.length} workers to Excel.`, 'success');
+      } catch (error) {
+        handleError(error, 'Export');
+      } finally {
+        state.isExporting = false;
+        setButtonState('btn-export', { disabled: false, label: 'Generate Master Excel', iconSpin: false });
+      }
+    }
+
+    // ==================== UI RENDERING ====================
+    function renderHeaderStats() {
+      document.getElementById('stat-hdr-contracts').innerText = state.contracts.length;
+      document.getElementById('stat-hdr-projects').innerText = state.projects.length;
+      document.getElementById('stat-hdr-workers').innerText = state.workers.length;
+      document.getElementById('worker-count-val').innerText = state.workers.length;
+      lucide.createIcons();
+    }
+
+    function renderTableHeader() {
+      const headerRow = document.getElementById('table-header-row');
+      headerRow.innerHTML = '';
+      const visibleColumns = gridColumns.filter(col => !state.hiddenColumns.has(col.key));
+      visibleColumns.forEach((col, index) => {
+        const th = document.createElement('th');
+        let classes = `px-3 py-3 border-b border-blue-200 hover:bg-blue-100/60 cursor-pointer transition-colors whitespace-nowrap ${col.width}`;
+        if (col.sticky !== undefined) classes += ` sticky-col-${col.sticky} bg-blue-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]`;
+        th.className = classes;
+        if (col.key === 'index') {
+          th.innerHTML = '<span>#</span>';
+        } else {
+          const isSorted = (state.sortConfig && state.sortConfig.key === col.key);
+          const arrow = isSorted ? (state.sortConfig.direction === 'asc' ? '↑' : '↓') : '';
+          th.onclick = () => handleSort(col.key);
+          th.ondblclick = () => startColumnRename(th, col, index);
+          th.innerHTML = `
+            <div class="flex items-center gap-1.5 column-header-content" data-col-index="${index}">
+              <span>${col.label}</span>
+              <span class="text-blue-700 font-bold text-xs">${arrow}</span>
+            </div>
+          `;
+        }
+        headerRow.appendChild(th);
+      });
+    }
+
+    function startColumnRename(th, col, index) {
+      const contentDiv = th.querySelector('.column-header-content');
+      if (!contentDiv || th.querySelector('input')) return;
+      const currentLabel = col.label;
+      contentDiv.innerHTML = `<input type="text" value="${currentLabel}" class="text-xs font-semibold text-slate-700 bg-white border border-slate-500 rounded px-1 py-0.5 w-full outline-none" style="min-width: 60px;" />`;
+      const input = contentDiv.querySelector('input');
+      input.focus();
+      input.select();
+      const finishRename = () => {
+        const newLabel = input.value.trim() || currentLabel;
+        gridColumns[index].label = newLabel;
+        renderTableHeader();
+        renderTableData();
+      };
+      input.addEventListener('blur', finishRename);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+        else if (e.key === 'Escape') {
+          input.value = currentLabel;
+          input.blur();
+        }
+      });
+    }
+
+    function renderTreeSidebar() {
+      const container = document.getElementById('tree-container');
+      container.innerHTML = '';
+      const allItem = document.createElement('div');
+      const isAllSelected = state.selectedScope.type === 'ALL';
+      allItem.className = `flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer font-medium transition-colors mb-1.5 ${isAllSelected ? 'bg-blue-100 text-blue-900' : 'text-slate-700 hover:bg-blue-50'}`;
+      allItem.onclick = () => setScope('ALL', null);
+      allItem.innerHTML = `<i data-lucide="database" class="w-4 h-4 text-blue-600"></i> <span>All Records (${state.workers.length})</span>`;
+      container.appendChild(allItem);
+
+      state.contracts.forEach((contract) => {
+        if (state.treeSearch && !contract.contractNumber?.toLowerCase().includes(state.treeSearch) && !contract.contractName?.toLowerCase().includes(state.treeSearch)) {
+          const projMatches = state.projects.some(p => p.contractNumber === contract.contractNumber && (p.projectNumber?.toLowerCase().includes(state.treeSearch) || p.projectName?.toLowerCase().includes(state.treeSearch)));
+          if (!projMatches) return;
+        }
+
+        const contractWrapper = document.createElement('div');
+        contractWrapper.className = 'mb-1';
+        const isContractSelected = state.selectedScope.type === 'CONTRACT' && state.selectedScope.id === contract.contractNumber;
+        const cProjects = state.projects.filter(p => p.contractNumber === contract.contractNumber);
+        let visibleProjects = cProjects;
+        if (state.hideZeroWorkerProjects) {
+          visibleProjects = cProjects.filter(proj => {
+            return state.workers.filter(w => w.projectId === proj.projectNumber).length > 0;
+          });
+          if (visibleProjects.length === 0 && cProjects.length > 0) return;
+        }
+        const isCollapsed = state.collapsedContracts.has(contract.contractNumber);
+
+        const contractHead = document.createElement('div');
+        contractHead.className = `flex items-center justify-between px-2 py-1.5 rounded cursor-pointer font-medium hover:bg-blue-100/60 ${isContractSelected ? 'bg-blue-50 text-blue-900' : 'text-slate-700'}`;
+        contractHead.onclick = () => {
+          if (state.collapsedContracts.has(contract.contractNumber)) state.collapsedContracts.delete(contract.contractNumber);
+          else state.collapsedContracts.add(contract.contractNumber);
+          renderTreeSidebar();
+        };
+        contractHead.innerHTML = `
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-sm">📜</span>
+            <span class="font-semibold truncate" title="${contract.contractName || contract.contractNumber}">${contract.contractNumber}</span>
+          </div>
+          <span class="text-xs bg-blue-100 text-blue-700 px-1 rounded-full">${visibleProjects.length}</span>
+        `;
+        contractWrapper.appendChild(contractHead);
+
+        const projContainer = document.createElement('div');
+        projContainer.className = `ml-4 border-l border-blue-200 pl-2 mt-0.5 space-y-0.5 ${isCollapsed ? 'hidden' : ''}`;
+        visibleProjects.forEach((proj) => {
+          if (state.treeSearch && !proj.projectNumber?.toLowerCase().includes(state.treeSearch) && !proj.projectName?.toLowerCase().includes(state.treeSearch)) return;
+          const isProjSelected = state.selectedScope.type === 'PROJECT' && state.selectedScope.id === proj.projectNumber;
+          const projItem = document.createElement('div');
+          projItem.className = `flex items-center justify-between px-2 py-1 rounded cursor-pointer text-xs ${isProjSelected ? 'bg-blue-50 text-blue-900 font-semibold' : 'text-slate-600 hover:bg-blue-50'}`;
+          projItem.onclick = (e) => {
+            e.stopPropagation();
+            setScope('PROJECT', proj.projectNumber);
+          };
+          projItem.innerHTML = `
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="truncate" title="${proj.projectName || proj.projectNumber}">${proj.projectNumber}</span>
+            </div>
+            <span class="text-xs text-blue-600 font-mono">${state.workers.filter(w => w.projectId === proj.projectNumber).length}</span>
+          `;
+          projContainer.appendChild(projItem);
+        });
+        contractWrapper.appendChild(projContainer);
+        container.appendChild(contractWrapper);
+      });
+      lucide.createIcons();
+    }
+
+    function getFilteredAndSortedWorkers() {
+      let filtered = [...state.workers];
+      if (state.selectedScope.type === 'CONTRACT') {
+        filtered = filtered.filter(w => w.contractNumber === state.selectedScope.id);
+      } else if (state.selectedScope.type === 'PROJECT') {
+        filtered = filtered.filter(w => w.projectId === state.selectedScope.id);
+      }
+      if (state.gridSearch) {
+        const query = state.gridSearch.toLowerCase();
+        filtered = filtered.filter(w =>
+          (w.personnelNumber || '').toLowerCase().includes(query) ||
+          (w.workerName || '').toLowerCase().includes(query) ||
+          (w.passportNumber || '').toLowerCase().includes(query) ||
+          (w.iqamaNumber || '').toLowerCase().includes(query) ||
+          (w.jobProfession || '').toLowerCase().includes(query) ||
+          (w.nationality || '').toLowerCase().includes(query)
+        );
+      }
+      if (state.jobProfessionFilter) {
+        const query = state.jobProfessionFilter.toLowerCase();
+        filtered = filtered.filter(w => String(w.jobProfession || '').toLowerCase().includes(query));
+      }
+      if (state.mainStatusFilter) {
+        filtered = filtered.filter(w => String(w.mainStatusName || '').toLowerCase() === state.mainStatusFilter.toLowerCase());
+      }
+      if (state.sortConfig && state.sortConfig.key) {
+        const { key, direction } = state.sortConfig;
+        const numericKeys = new Set(['age', 'salary', 'passportValidity', 'iqamaValidity', 'leaveBalance']);
+        filtered.sort((a, b) => {
+          let valA = a[key];
+          let valB = b[key];
+          if (numericKeys.has(key)) {
+            const numA = Number(String(valA ?? '').replace(/,/g, ''));
+            const numB = Number(String(valB ?? '').replace(/,/g, ''));
+            if (Number.isNaN(numA) && Number.isNaN(numB)) return 0;
+            if (Number.isNaN(numA)) return direction === 'asc' ? 1 : -1;
+            if (Number.isNaN(numB)) return direction === 'asc' ? -1 : 1;
+            return (numA - numB) * (direction === 'asc' ? 1 : -1);
+          }
+          const strA = String(valA ?? '').toLowerCase();
+          const strB = String(valB ?? '').toLowerCase();
+          return (strA < strB ? -1 : strA > strB ? 1 : 0) * (direction === 'asc' ? 1 : -1);
+        });
+      }
+      return filtered;
+    }
+
+    function renderEmptyState(colspan) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td colspan="${colspan}" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center gap-2">
+            <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+            <p class="text-sm">No worker profiles found matching the current filters.</p>
+          </div>
+        </td>
+      `;
+      return tr;
+    }
+
+    function renderTableData() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      try {
+        const dataset = getFilteredAndSortedWorkers();
+        const visibleColumns = gridColumns.filter(col => !state.hiddenColumns.has(col.key));
+        document.getElementById('grid-records-count').innerText = `Showing ${dataset.length} of ${state.workers.length} records`;
+
+        const totalPages = Math.ceil(dataset.length / state.pageSize) || 1;
+        if (state.currentPage > totalPages) state.currentPage = totalPages;
+        const startIndex = (state.currentPage - 1) * state.pageSize;
+        const paginatedData = dataset.slice(startIndex, startIndex + state.pageSize);
+
+        document.getElementById('pagination-info').innerText = `Page ${state.currentPage} of ${totalPages}`;
+        document.getElementById('btn-prev-page').disabled = state.currentPage <= 1;
+        document.getElementById('btn-next-page').disabled = state.currentPage >= totalPages;
+
+        if (paginatedData.length === 0) {
+          tbody.appendChild(renderEmptyState(visibleColumns.length));
+          lucide.createIcons();
+          return;
+        }
+
+        paginatedData.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-blue-50/40 transition-colors cursor-pointer group";
+          tr.onclick = () => openWorkerModal(row);
+
+          visibleColumns.forEach((col) => {
+            const td = document.createElement('td');
+            let classes = `px-3 py-2.5 whitespace-nowrap border-b border-blue-50 ${col.width}`;
+            if (col.sticky !== undefined) classes += ` sticky-col-${col.sticky} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`;
+            td.className = classes;
+            td.appendChild(formatCellValue(row, col, startIndex + index + 1));
+
+            if (col.sticky !== undefined) {
+              const leftMap = { 0: '0px', 1: '40px', 2: '152px' };
+              td.style.position = 'sticky';
+              td.style.left = leftMap[col.sticky] || '0px';
+              td.style.backgroundColor = '#ffffff';
+              td.style.zIndex = '20';
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        lucide.createIcons();
+      } catch (error) {
+        handleError(error, 'Render table');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${gridColumns.filter(col => !state.hiddenColumns.has(col.key)).length}" class="py-12 text-center text-slate-400">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <i data-lucide="alert-circle" class="w-8 h-8 text-slate-300"></i>
+                <p class="text-sm">Failed to render grid: ${error.message}</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    function formatCellValue(row, col, rowIndex) {
+      const td = document.createElement('span');
+      td.className = 'block';
+
+      if (col.key === 'index') {
+        td.innerHTML = `<span class="text-slate-500 font-medium">${rowIndex}</span>`;
+      } else if (col.key === 'personnelNumber') {
+        td.innerHTML = `<span class="font-mono font-medium text-slate-900">${row.personnelNumber}</span>`;
+      } else if (col.key === 'mainStatusName') {
+        const status = String(row.mainStatusName || '');
+        const lower = status.toLowerCase();
+        let badgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
+        if (lower.includes('working')) badgeClass = 'bg-green-100 text-green-800 border border-green-200';
+        else if (lower.includes('vacation')) badgeClass = 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+        else if (lower.includes('does not work') || lower.includes('case resolution')) badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200';
+        td.innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-semibold ${badgeClass}">${status}</span>`;
+      } else if (col.key === 'salary') {
+        const raw = Number(String(row.salary).replace(/,/g, ''));
+        td.innerHTML = `<span class="font-mono text-slate-700">${Number.isNaN(raw) ? '--' : raw.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+      } else if (col.key === 'leaveBalance') {
+        const val = row.leaveBalance;
+        td.innerHTML = `<span class="font-mono text-slate-700">${typeof val === 'number' ? val.toFixed(1) : (val ?? '--')}</span>`;
+      } else if (col.key === 'mobile') {
+        const raw = String(row.mobile ?? '');
+        const normalized = raw.startsWith('00966') ? `+966${raw.slice(5)}` : raw;
+        td.innerHTML = `<span class="font-mono text-slate-600">${normalized}</span>`;
+      } else if (col.key === 'iqamaNumber') {
+        td.innerHTML = `<span class="font-mono text-slate-600">${row.iqamaNumber || '--'}</span>`;
+      } else if (col.key === 'nationality') {
+        const raw = String(row.nationality ?? '');
+        const proper = raw.toLowerCase().replace(/\b\w/g, m => m.toUpperCase());
+        td.innerText = proper || '--';
+      } else if (col.key === 'religion') {
+        const raw = String(row.religion ?? '');
+        const proper = raw.toLowerCase().replace(/\b\w/g, m => m.toUpperCase());
+        td.innerText = proper || '--';
+      } else if (col.key === 'jobProfession') {
+        td.innerText = row.jobProfession || '--';
+      } else if (col.key === 'passportValidity' || col.key === 'iqamaValidity') {
+        const raw = row[col.key];
+        const num = typeof raw === 'number' ? raw : Number(raw);
+        td.innerHTML = `<span class="font-mono text-slate-700">${Number.isNaN(num) ? '--' : num.toLocaleString()}</span>`;
+      } else if (['dateOfBirth', 'dateOfJoin', 'passportExpirationDate', 'iqamaExpiryDate', 'contractStartDate', 'contractEndDate'].includes(col.key)) {
+        td.innerText = formatDate(row[col.key]);
+      } else {
+        td.innerText = row[col.key] ?? '--';
+      }
+      return td;
+    }
+
+    // ==================== STATUS DISPLAY ====================
+    function showStatus(message, type = 'info') {
+      const statusBar = document.getElementById('status-bar');
+      const statusIcon = document.getElementById('status-icon');
+      const statusMessage = document.getElementById('status-message');
+      statusBar.classList.remove('hidden');
+      statusMessage.innerText = message;
+      const icons = {
+        loading: '<span class="animate-spin inline-block w-3 h-3 border-2 border-blue-200 border-t-white rounded-full"></span>',
+        success: '<span class="text-green-300">✓</span>',
+        error: '<span class="text-red-300">✗</span>',
+        info: '<span class="text-blue-200">ℹ</span>'
+      };
+      statusIcon.innerHTML = icons[type] || icons.info;
+      statusBar.className = `bg-blue-600 text-white text-xs px-4 py-2 border-b border-blue-700 shrink-0 z-50`;
+      if (type === 'error') statusBar.className = 'bg-red-600 text-white text-xs px-4 py-2 border-b border-red-700 shrink-0 z-50';
+      else if (type === 'success') statusBar.className = 'bg-green-600 text-white text-xs px-4 py-2 border-b border-green-700 shrink-0 z-50';
+    }
+
+    // ==================== EVENT HANDLERS ====================
+    function setScope(type, id) {
+      state.selectedScope = { type, id };
+      state.currentPage = 1;
+      document.getElementById('scope-count').innerText = type === 'ALL' ? 'All' : id;
+      renderTreeSidebar();
+      renderTableData();
+    }
+
+    function toggleColumnVisibility() {
+      const modal = document.getElementById('column-modal');
+      const container = document.getElementById('column-checkboxes');
+      if (!modal || !container) return;
+      container.innerHTML = gridColumns
+        .filter(col => col.key !== 'index')
+        .map(col => `
+          <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+            <input type="checkbox" data-col-key="${col.key}" ${!state.hiddenColumns.has(col.key) ? 'checked' : ''} class="rounded border-slate-300 text-slate-600 focus:ring-slate-500" />
+            <span>${col.label}</span>
+          </label>
+        `).join('');
+      openModal('column-modal');
+    }
+
+    function showAllColumns() {
+      state.hiddenColumns.clear();
+      closeModal('column-modal');
+      renderTableHeader();
+      renderTableData();
+    }
+
+    function applyColumnVisibility() {
+      const checkboxes = document.querySelectorAll('#column-checkboxes input[type="checkbox"]');
+      state.hiddenColumns.clear();
+      checkboxes.forEach(cb => {
+        if (!cb.checked) state.hiddenColumns.add(cb.dataset.colKey);
+      });
+      closeModal('column-modal');
+      renderTableHeader();
+      renderTableData();
+    }
+
+    function toggleSidebar() {
+      state.sidebarCollapsed = !state.sidebarCollapsed;
+      const sidebar = document.getElementById('sidebar');
+      const header = document.getElementById('sidebar-header');
+      const expandBtn = document.getElementById('sidebar-expand-btn');
+      if (state.sidebarCollapsed) {
+        sidebar.style.width = '64px';
+        if (header) header.classList.add('hidden');
+        if (expandBtn) expandBtn.classList.remove('hidden');
+      } else {
+        sidebar.style.width = '312px';
+        if (header) header.classList.remove('hidden');
+        if (expandBtn) expandBtn.classList.add('hidden');
+      }
+      lucide.createIcons();
+      storage.saveSetting(STORAGE_KEYS.SIDEBAR_COLLAPSED, state.sidebarCollapsed);
+    }
+
+    function toggleZeroWorkersFilter() {
+      state.hideZeroWorkerProjects = !state.hideZeroWorkerProjects;
+      const eyeBtn = document.getElementById('zero-workers-toggle');
+      if (eyeBtn) {
+        eyeBtn.innerHTML = state.hideZeroWorkerProjects
+          ? '<i data-lucide="eye" class="w-3.5 h-3.5"></i>'
+          : '<i data-lucide="eye-off" class="w-3.5 h-3.5"></i>';
+        eyeBtn.setAttribute('title', state.hideZeroWorkerProjects ? 'Show projects with 0 workers' : 'Hide projects with 0 workers');
+      }
+      lucide.createIcons();
+      storage.saveSetting(STORAGE_KEYS.HIDE_ZERO_WORKER_PROJECTS, state.hideZeroWorkerProjects);
+      renderTreeSidebar();
+    }
+
+    function populateMainStatusFilter() {
+      const statuses = new Set();
+      state.workers.forEach(w => {
+        const status = String(w.mainStatusName || '').trim();
+        if (status) statuses.add(status);
+      });
+      const sorted = Array.from(statuses).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+      const select = document.getElementById('main-status-filter');
+      if (select) {
+        select.innerHTML = '<option value="">All Status</option>' +
+          sorted.map(status => `<option value="${status}">${status}</option>`).join('');
+      }
+    }
+
+    function handleSort(key) {
+      if (state.sortConfig.key === key) {
+        state.sortConfig.direction = state.sortConfig.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortConfig.key = key;
+        state.sortConfig.direction = 'asc';
+      }
+      renderTableHeader();
+      renderTableData();
+    }
+
+    function changePageSize(size) {
+      const parsed = parseInt(size, 10);
+      state.pageSize = parsed;
+      state.currentPage = 1;
+      storage.saveSetting(STORAGE_KEYS.PAGE_SIZE, parsed);
+      renderTableData();
+    }
+
+    function prevPage() {
+      if (state.currentPage > 1) {
+        state.currentPage--;
+        renderTableData();
+      }
+    }
+
+    function nextPage() {
+      const dataset = getFilteredAndSortedWorkers();
+      const totalPages = Math.ceil(dataset.length / state.pageSize);
+      if (state.currentPage < totalPages) {
+        state.currentPage++;
+        renderTableData();
+      }
+    }
+
+    function toggleParallel(enabled) {
+      state.parallelEnabled = enabled;
+      document.getElementById('slider-threads').disabled = !enabled;
+      storage.saveSetting(STORAGE_KEYS.PARALLEL_ENABLED, enabled);
+    }
+
+    function updateThreads(val) {
+      const parsed = parseInt(val, 10);
+      state.threadCount = parsed;
+      document.getElementById('thread-count-disp').innerText = val;
+      storage.saveSetting(STORAGE_KEYS.THREAD_COUNT, parsed);
+    }
+
+    async function updateCacheIndicator() {
+      const cacheWorkersEl = document.getElementById('cache-workers');
+      const cacheProjectsEl = document.getElementById('cache-projects');
+      const cacheLastUpdatedEl = document.getElementById('cache-last-updated');
+      if (cacheWorkersEl) {
+        cacheWorkersEl.innerHTML = `<i data-lucide="users" class="w-3 h-3"></i> Workers: <span class="font-mono font-medium">${state.workers.length}</span>`;
+      }
+      if (cacheProjectsEl) {
+        cacheProjectsEl.innerHTML = `<i data-lucide="folder" class="w-3 h-3"></i> Projects: <span class="font-mono font-medium">${state.projects.length}</span>`;
+      }
+      if (cacheLastUpdatedEl) {
+        const stored = await storage.getSetting(STORAGE_KEYS.CACHE_LAST_UPDATED);
+        const now = stored ? new Date(stored) : new Date();
+        cacheLastUpdatedEl.innerText = `Last updated: ${now.toLocaleTimeString()}`;
+      }
+      if (cacheWorkersEl || cacheProjectsEl || cacheLastUpdatedEl) lucide.createIcons();
+    }
+
+    async function clearCache() {
+      if (state.isCacheOperationInProgress) {
+        showStatus('Cache operation already in progress...', 'info');
+        return;
+      }
+      openModal('clear-cache-modal');
+    }
+
+    async function confirmClearCache() {
+      if (state.isCacheOperationInProgress) {
+        showStatus('Cache operation already in progress...', 'info');
+        return;
+      }
+      closeModal('clear-cache-modal');
+      state.isCacheOperationInProgress = true;
+      try {
+        await storage._clear('workerDetails');
+        await storage._clear('projectSummaries');
+        await storage._delete('settings', STORAGE_KEYS.ALL_PROJECTS).catch(() => {});
+        await storage._delete('settings', STORAGE_KEYS.ALL_CONTRACTS).catch(() => {});
+        await storage.saveSetting(STORAGE_KEYS.CACHE_LAST_UPDATED, null);
+        state.workers = [];
+        state.projects = [];
+        state.contracts = [];
+        renderHeaderStats();
+        renderTreeSidebar();
+        renderTableData();
+        updateCacheIndicator();
+        showStatus('Cache cleared successfully.', 'success');
+      } catch (error) {
+        handleError(error, 'Clear cache');
+      } finally {
+        state.isCacheOperationInProgress = false;
+      }
+    }
+
+    // ==================== WORKER PROFILE ====================
+    function openWorkerModal(worker) {
+      document.getElementById('modal-worker-name').innerText = worker.workerName || 'Unknown';
+      document.getElementById('modal-personnel-no').innerText = worker.personnelNumber || 'N/A';
+      document.getElementById('modal-main-status').innerText = worker.mainStatusName || 'Unknown';
+      document.getElementById('modal-profession').innerText = worker.jobProfession || 'Unknown';
+      document.getElementById('modal-salary').innerText = `SAR ${worker.salary || '0.00'}`;
+      document.getElementById('modal-iqama').innerText = worker.iqamaNumber || '--';
+      document.getElementById('modal-iqama-exp').innerText = `${formatDate(worker.iqamaExpiryDate)} (${worker.iqamaValidity || '--'}d validity)`;
+      document.getElementById('modal-passport').innerText = worker.passportNumber || '--';
+      document.getElementById('modal-passport-exp').innerText = `${formatDate(worker.passportExpirationDate)} (${worker.passportValidity || '--'}d validity)`;
+      document.getElementById('modal-nationality').innerText = worker.nationality || '--';
+      document.getElementById('modal-mobile').innerText = worker.mobile || '--';
+      document.getElementById('modal-dob').innerText = `${formatDate(worker.dateOfBirth)} (Age ${worker.age || '--'})`;
+      document.getElementById('modal-gender-rel').innerText = `${worker.gender || '--'} / ${worker.religion || '--'}`;
+      document.getElementById('modal-proj-id').innerText = worker.projectId || '--';
+      document.getElementById('modal-proj-name').innerText = worker.projectName || '--';
+      openModal('worker-modal');
+    }
+
+    // ==================== REFRESH MODAL HANDLERS ====================
+    async function refreshFromCache() {
+      closeModal('refresh-modal');
+      try {
+        await loadCachedData();
+        updateCacheIndicator();
+        showStatus(`Loaded ${state.workers.length} workers from cache.`, 'success');
+      } catch (error) {
+        handleError(error, 'Cache refresh');
+      }
+    }
+
+    async function refreshFromAPI() {
+      if (state.isCacheOperationInProgress) {
+        showStatus('Cache operation already in progress...', 'info');
+        return;
+      }
+      closeModal('refresh-modal');
+      state.isCacheOperationInProgress = true;
+      try {
+        await storage._clear('workerDetails');
+        await storage._clear('projectSummaries');
+        await storage._delete('settings', STORAGE_KEYS.ALL_PROJECTS).catch(() => {});
+        await storage._delete('settings', STORAGE_KEYS.ALL_CONTRACTS).catch(() => {});
+        state.workers = [];
+        state.projects = [];
+        state.contracts = [];
+        renderHeaderStats();
+        renderTreeSidebar();
+        renderTableData();
+        showExtractionOverlay('Fetching fresh data from server...');
+        await loadData();
+        if (state.workers.length > 0 && state.isAuthenticated) {
+          await triggerExtraction(true);
+        } else {
+          hideExtractionOverlay();
+        }
+        updateCacheIndicator();
+        showStatus(`Loaded ${state.workers.length} workers from server.`, 'success');
+      } catch (error) {
+        hideExtractionOverlay();
+        handleError(error, 'API refresh');
+      } finally {
+        state.isCacheOperationInProgress = false;
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
     const gridColumns = [
       { key: 'index', label: '#', width: 'w-16', sticky: 0 },
       { key: 'personnelNumber', label: 'Personnel #', width: 'w-32', sticky: 1 },
@@ -921,1357 +2337,11 @@
       { key: 'contractNumber', label: 'Contract Ref', width: 'w-32' }
     ];
 
-    // ==================== UI RENDERING ====================
-    function renderHeaderStats() {
-      document.getElementById('stat-hdr-contracts').innerText = state.contracts.length;
-      document.getElementById('stat-hdr-projects').innerText = state.projects.length;
-      document.getElementById('stat-hdr-workers').innerText = state.workers.length;
-      const workerCountEl = document.getElementById('worker-count-val');
-      if (workerCountEl) workerCountEl.innerText = state.workers.length;
-
-      lucide.createIcons();
-    }
-
-    function renderTableHeader() {
-      const headerRow = document.getElementById('table-header-row');
-      headerRow.innerHTML = '';
-
-      const visibleColumns = gridColumns.filter(col => !state.hiddenColumns.has(col.key));
-      
-      visibleColumns.forEach((col, index) => {
-        const th = document.createElement('th');
-        let classes = `px-3 py-3 border-b border-blue-200 hover:bg-blue-100/60 cursor-pointer transition-colors whitespace-nowrap ${col.width}`;
-        
-        if (col.sticky !== undefined) {
-          classes += ` sticky-col-${col.sticky} bg-blue-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]`;
-        }
-
-        th.className = classes;
-
-        if (col.key === 'index') {
-          th.innerHTML = '<span>#</span>';
-        } else {
-          const isSorted = (state.sortConfig && state.sortConfig.key === col.key);
-          const arrow = isSorted ? (state.sortConfig.direction === 'asc' ? '↑' : '↓') : '';
-          th.onclick = () => handleSort(col.key);
-          th.ondblclick = () => startColumnRename(th, col, index);
-          th.innerHTML = `
-            <div class="flex items-center gap-1.5 column-header-content" data-col-index="${index}">
-              <span>${col.label}</span>
-              <span class="text-blue-700 font-bold text-xs">${arrow}</span>
-            </div>
-          `;
-        }
-        headerRow.appendChild(th);
-      });
-    }
-
-    function startColumnRename(th, col, index) {
-      const contentDiv = th.querySelector('.column-header-content');
-      if (!contentDiv || th.querySelector('input')) return;
-      
-      const currentLabel = col.label;
-      contentDiv.innerHTML = `<input type="text" value="${currentLabel}" class="text-xs font-semibold text-slate-700 bg-white border border-slate-500 rounded px-1 py-0.5 w-full outline-none" style="min-width: 60px;" />`;
-      
-      const input = contentDiv.querySelector('input');
-      input.focus();
-      input.select();
-      
-      const finishRename = () => {
-        const newLabel = input.value.trim() || currentLabel;
-        gridColumns[index].label = newLabel;
-        renderTableHeader();
-        renderTableData();
-      };
-      
-      input.addEventListener('blur', finishRename);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          input.blur();
-        } else if (e.key === 'Escape') {
-          input.value = currentLabel;
-          input.blur();
-        }
-      });
-    }
-
-    function renderTreeSidebar() {
-      const container = document.getElementById('tree-container');
-      container.innerHTML = '';
-
-      // "All Data" Root Node
-      const allItem = document.createElement('div');
-      const isAllSelected = state.selectedScope.type === 'ALL';
-      allItem.className = `flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer font-medium transition-colors mb-1.5 ${isAllSelected ? 'bg-blue-100 text-blue-900' : 'text-slate-700 hover:bg-blue-50'}`;
-      allItem.onclick = () => setScope('ALL', null);
-      allItem.innerHTML = `<i data-lucide="database" class="w-4 h-4 text-blue-600"></i> <span>All Records (${state.workers.length})</span>`;
-      container.appendChild(allItem);
-
-      // Render Contracts and Nested Projects
-      state.contracts.forEach((contract) => {
-        if (state.treeSearch && !contract.contractNumber?.toLowerCase().includes(state.treeSearch) && !contract.contractName?.toLowerCase().includes(state.treeSearch)) {
-          const projMatches = state.projects.some(p => p.contractNumber === contract.contractNumber && (p.projectNumber?.toLowerCase().includes(state.treeSearch) || p.projectName?.toLowerCase().includes(state.treeSearch)));
-          if (!projMatches) return;
-        }
-
-        const contractWrapper = document.createElement('div');
-        contractWrapper.className = 'mb-1';
-
-        const isContractSelected = state.selectedScope.type === 'CONTRACT' && state.selectedScope.id === contract.contractNumber;
-        const cProjects = state.projects.filter(p => p.contractNumber === contract.contractNumber);
-        
-        // Filter projects with zero workers if toggle is enabled
-        let visibleProjects = cProjects;
-        if (state.hideZeroWorkerProjects) {
-          visibleProjects = cProjects.filter(proj => {
-            const projWorkers = state.workers.filter(w => w.projectId === proj.projectNumber);
-            return projWorkers.length > 0;
-          });
-          
-          // Hide entire contract if all projects have zero workers
-          if (visibleProjects.length === 0 && cProjects.length > 0) {
-            return;
-          }
-        }
-        
-        const isCollapsed = state.collapsedContracts.has(contract.contractNumber);
-
-        const contractHead = document.createElement('div');
-        contractHead.className = `flex items-center justify-between px-2 py-1.5 rounded cursor-pointer font-medium hover:bg-blue-100/60 ${isContractSelected ? 'bg-blue-50 text-blue-900' : 'text-slate-700'}`;
-        contractHead.onclick = () => {
-          if (state.collapsedContracts.has(contract.contractNumber)) {
-            state.collapsedContracts.delete(contract.contractNumber);
-          } else {
-            state.collapsedContracts.add(contract.contractNumber);
-          }
-          renderTreeSidebar();
-        };
-        contractHead.innerHTML = `
-          <div class="flex items-center gap-1.5 truncate">
-            <span class="text-sm">📜</span>
-            <span class="font-semibold truncate" title="${contract.contractName || contract.contractNumber}">${contract.contractNumber}</span>
-          </div>
-          <span class="text-xs bg-blue-100 text-blue-700 px-1 rounded-full">${visibleProjects.length}</span>
-        `;
-        contractWrapper.appendChild(contractHead);
-
-        // Projects Sub-tree
-        const projContainer = document.createElement('div');
-        projContainer.className = `ml-4 border-l border-blue-200 pl-2 mt-0.5 space-y-0.5 ${isCollapsed ? 'hidden' : ''}`;
-
-        visibleProjects.forEach((proj) => {
-          if (state.treeSearch && !proj.projectNumber?.toLowerCase().includes(state.treeSearch) && !proj.projectName?.toLowerCase().includes(state.treeSearch)) {
-            return;
-          }
-
-          const isProjSelected = state.selectedScope.type === 'PROJECT' && state.selectedScope.id === proj.projectNumber;
-          const isProjCollapsed = state.collapsedProjects.has(proj.projectNumber);
-
-          const projItem = document.createElement('div');
-          projItem.className = `flex items-center justify-between px-2 py-1 rounded cursor-pointer text-xs ${isProjSelected ? 'bg-blue-50 text-blue-900 font-semibold' : 'text-slate-600 hover:bg-blue-50'}`;
-          projItem.onclick = (e) => {
-            e.stopPropagation();
-            setScope('PROJECT', proj.projectNumber);
-          };
-
-          projItem.innerHTML = `
-            <div class="flex items-center gap-1.5 truncate">
-              <span class="truncate" title="${proj.projectName || proj.projectNumber}">${proj.projectNumber}</span>
-            </div>
-            <span class="text-xs text-blue-600 font-mono">${state.workers.filter(w => w.projectId === proj.projectNumber).length}</span>
-          `;
-          projContainer.appendChild(projItem);
-        });
-
-        contractWrapper.appendChild(projContainer);
-        container.appendChild(contractWrapper);
-      });
-
-      lucide.createIcons();
-    }
-
-    function getFilteredAndSortedWorkers() {
-      let filtered = [...state.workers];
-
-      // 1. Filter by Scope
-      if (state.selectedScope.type === 'CONTRACT') {
-        filtered = filtered.filter(w => w.contractNumber === state.selectedScope.id);
-      } else if (state.selectedScope.type === 'PROJECT') {
-        filtered = filtered.filter(w => w.projectId === state.selectedScope.id);
-      }
-
-      // 2. Filter by Search Term
-      if (state.gridSearch) {
-        const query = state.gridSearch.toLowerCase();
-        filtered = filtered.filter(w => 
-          (w.personnelNumber || '').toLowerCase().includes(query) ||
-          (w.workerName || '').toLowerCase().includes(query) ||
-          (w.passportNumber || '').toLowerCase().includes(query) ||
-          (w.iqamaNumber || '').toLowerCase().includes(query) ||
-          (w.jobProfession || '').toLowerCase().includes(query) ||
-          (w.nationality || '').toLowerCase().includes(query)
-        );
-      }
-
-      // 2b. Filter by Job Profession
-      if (state.jobProfessionFilter) {
-        const query = state.jobProfessionFilter.toLowerCase();
-        filtered = filtered.filter(w => String(w.jobProfession || '').toLowerCase().includes(query));
-      }
-
-      // 2c. Filter by Main Status
-      if (state.mainStatusFilter) {
-        filtered = filtered.filter(w => String(w.mainStatusName || '').toLowerCase() === state.mainStatusFilter.toLowerCase());
-      }
-
-      // 3. Sort
-      if (state.sortConfig && state.sortConfig.key) {
-        const { key, direction } = state.sortConfig;
-        const numericKeys = new Set(['age', 'salary', 'passportValidity', 'iqamaValidity', 'leaveBalance']);
-        filtered.sort((a, b) => {
-          let valA = a[key];
-          let valB = b[key];
-
-          if (numericKeys.has(key)) {
-            const numA = Number(String(valA ?? '').replace(/,/g, ''));
-            const numB = Number(String(valB ?? '').replace(/,/g, ''));
-            if (Number.isNaN(numA) && Number.isNaN(numB)) return 0;
-            if (Number.isNaN(numA)) return direction === 'asc' ? 1 : -1;
-            if (Number.isNaN(numB)) return direction === 'asc' ? -1 : 1;
-            if (numA < numB) return direction === 'asc' ? -1 : 1;
-            if (numA > numB) return direction === 'asc' ? 1 : -1;
-            return 0;
-          }
-
-          const strA = String(valA ?? '').toLowerCase();
-          const strB = String(valB ?? '').toLowerCase();
-          if (strA < strB) return direction === 'asc' ? -1 : 1;
-          if (strA > strB) return direction === 'asc' ? 1 : -1;
-          return 0;
-        });
-      }
-
-      return filtered;
-    }
-
-    function renderTableData() {
-      const tbody = document.getElementById('table-body');
-      tbody.innerHTML = '';
-
-      try {
-        const dataset = getFilteredAndSortedWorkers();
-        const visibleColumns = gridColumns.filter(col => !state.hiddenColumns.has(col.key));
-        
-        // Update Total Records count
-        document.getElementById('grid-records-count').innerText = `Showing ${dataset.length} of ${state.workers.length} records`;
-
-        // Pagination Slicing
-        const totalPages = Math.ceil(dataset.length / state.pageSize) || 1;
-        if (state.currentPage > totalPages) state.currentPage = totalPages;
-
-        const startIndex = (state.currentPage - 1) * state.pageSize;
-        const paginatedData = dataset.slice(startIndex, startIndex + state.pageSize);
-
-        // Pagination Controls Update
-        document.getElementById('pagination-info').innerText = `Page ${state.currentPage} of ${totalPages}`;
-        document.getElementById('btn-prev-page').disabled = state.currentPage <= 1;
-        document.getElementById('btn-next-page').disabled = state.currentPage >= totalPages;
-
-        if (paginatedData.length === 0) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td colSpan="${visibleColumns.length}" class="py-12 text-center text-slate-400">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
-                <p class="text-sm">No worker profiles found matching the current filters.</p>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(tr);
-          lucide.createIcons();
-          return;
-        }
-
-        paginatedData.forEach((row, index) => {
-          const tr = document.createElement('tr');
-          tr.className = "hover:bg-blue-50/40 transition-colors cursor-pointer group";
-          tr.onclick = () => openWorkerModal(row);
-
-          visibleColumns.forEach((col) => {
-            const td = document.createElement('td');
-            let classes = `px-3 py-2.5 whitespace-nowrap border-b border-blue-50 ${col.width}`;
-
-            if (col.sticky !== undefined) {
-              classes += ` sticky-col-${col.sticky} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`;
-            }
-
-            td.className = classes;
-
-            // Cell formatting switch
-            if (col.key === 'index') {
-              td.innerHTML = `<span class="text-slate-500 font-medium">${startIndex + index + 1}</span>`;
-            } else if (col.key === 'personnelNumber') {
-              td.innerHTML = `<span class="font-mono font-medium text-slate-900">${row.personnelNumber}</span>`;
-            } else if (col.key === 'mainStatusName') {
-              const status = String(row.mainStatusName || '');
-              const lower = status.toLowerCase();
-              let badgeClass = 'bg-blue-100 text-blue-800 border border-blue-200';
-              if (lower.includes('working')) {
-                badgeClass = 'bg-green-100 text-green-800 border border-green-200';
-              } else if (lower.includes('vacation')) {
-                badgeClass = 'bg-yellow-100 text-yellow-800 border border-yellow-200';
-              } else if (lower.includes('does not work') || lower.includes('case resolution')) {
-                badgeClass = 'bg-orange-100 text-orange-800 border border-orange-200';
-              }
-              td.innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-semibold ${badgeClass}">${status}</span>`;
-            } else if (col.key === 'salary') {
-              const raw = Number(String(row.salary).replace(/,/g, ''));
-              td.innerHTML = `<span class="font-mono text-slate-700">${Number.isNaN(raw) ? '--' : raw.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
-            } else if (col.key === 'leaveBalance') {
-              const val = row.leaveBalance;
-              td.innerHTML = `<span class="font-mono text-slate-700">${typeof val === 'number' ? val.toFixed(1) : (val ?? '--')}</span>`;
-            } else if (col.key === 'mobile') {
-              const raw = String(row.mobile ?? '');
-              const normalized = raw.startsWith('00966') ? `+966${raw.slice(5)}` : raw;
-              td.innerHTML = `<span class="font-mono text-slate-600">${normalized}</span>`;
-            } else if (col.key === 'iqamaNumber') {
-              td.innerHTML = `<span class="font-mono text-slate-600">${row.iqamaNumber || '--'}</span>`;
-            } else if (col.key === 'nationality') {
-              const raw = String(row.nationality ?? '');
-              const proper = raw.toLowerCase().replace(/\b\w/g, m => m.toUpperCase());
-              td.innerText = proper || '--';
-            } else if (col.key === 'religion') {
-              const raw = String(row.religion ?? '');
-              const proper = raw.toLowerCase().replace(/\b\w/g, m => m.toUpperCase());
-              td.innerText = proper || '--';
-            } else if (col.key === 'jobProfession') {
-              td.innerText = row.jobProfession || '--';
-            } else if (col.key === 'passportValidity' || col.key === 'iqamaValidity') {
-              const raw = row[col.key];
-              const num = typeof raw === 'number' ? raw : Number(raw);
-              td.innerHTML = `<span class="font-mono text-slate-700">${Number.isNaN(num) ? '--' : num.toLocaleString()}</span>`;
-            } else if (['dateOfBirth', 'dateOfJoin', 'passportExpirationDate', 'iqamaExpiryDate', 'contractStartDate', 'contractEndDate'].includes(col.key)) {
-              td.innerText = formatDate(row[col.key]);
-            } else {
-              td.innerText = row[col.key] ?? '--';
-            }
-
-            // Force sticky columns to stay opaque and pinned
-            if (col.sticky !== undefined) {
-              const leftMap = { 0: '0px', 1: '40px', 2: '152px' };
-              td.style.position = 'sticky';
-              td.style.left = leftMap[col.sticky] || '0px';
-              td.style.backgroundColor = '#ffffff';
-              td.style.zIndex = '20';
-            }
-
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-
-        lucide.createIcons();
-      } catch (error) {
-        console.error('[Grid] renderTableData error:', error);
-          tbody.innerHTML = `
-            <tr>
-              <td colSpan="${gridColumns.filter(col => !state.hiddenColumns.has(col.key)).length}" class="py-12 text-center text-slate-400">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <i data-lucide="alert-circle" class="w-8 h-8 text-slate-300"></i>
-                  <p class="text-sm">Failed to render grid: ${error.message}</p>
-                </div>
-              </td>
-            </tr>
-          `;
-        lucide.createIcons();
-      }
-    }
-
-    // ==================== STATUS DISPLAY ====================
-    function showStatus(message, type = 'info') {
-      const statusBar = document.getElementById('status-bar');
-      const statusIcon = document.getElementById('status-icon');
-      const statusMessage = document.getElementById('status-message');
-      
-      statusBar.classList.remove('hidden');
-      statusMessage.innerText = message;
-      
-      const icons = {
-        loading: '<span class="animate-spin inline-block w-3 h-3 border-2 border-blue-200 border-t-white rounded-full"></span>',
-        success: '<span class="text-green-300">✓</span>',
-        error: '<span class="text-red-300">✗</span>',
-        info: '<span class="text-blue-200">ℹ</span>'
-      };
-      
-      statusIcon.innerHTML = icons[type] || icons.info;
-      statusBar.className = `bg-blue-600 text-white text-xs px-4 py-2 border-b border-blue-700 shrink-0 z-50`;
-      
-      if (type === 'error') {
-        statusBar.className = 'bg-red-600 text-white text-xs px-4 py-2 border-b border-red-700 shrink-0 z-50';
-      } else if (type === 'success') {
-        statusBar.className = 'bg-green-600 text-white text-xs px-4 py-2 border-b border-green-700 shrink-0 z-50';
-      }
-    }
-
-    // ==================== AUTHENTICATION ====================
-    async function handleConnect() {
-      const username = document.getElementById('auth-username').value;
-      const password = document.getElementById('auth-password').value;
-
-      if (!username || !password) {
-        showStatus('Please enter username and password', 'error');
-        return;
-      }
-
-      try {
-        showExtractionOverlay('Authenticating...');
-        showStatus('Authenticating with SMASCO API...', 'loading');
-        
-        // Step 1: Login
-        updateExtractionOverlay('Authenticating...');
-        const token = await api.login(username, password);
-        if (!token) throw new Error('No token received from API');
-        
-        state.authToken = token;
-        state.isAuthenticated = true;
-
-        // Step 2: Extract UserID from JWT
-        updateExtractionOverlay('Getting user profile...');
-        const jwtPayload = decodeJWT(token);
-        state.userId = extractUserId(jwtPayload);
-        if (!state.userId) throw new Error('Could not extract UserID from token');
-
-        // Step 3: Get User Key
-        updateExtractionOverlay('Getting user key...');
-        state.userKey = await api.getUserKey(state.userId);
-        if (!state.userKey) throw new Error('Could not get user integration key');
-
-        await storage.saveCredentials(username);
-        await storage.saveSetting('authState', {
-          isAuthenticated: true,
-          userId: state.userId,
-          userKey: state.userKey,
-          authToken: state.authToken
-        });
-
-        // Update UI
-        document.getElementById('auth-overlay').classList.add('hidden');
-        document.getElementById('auth-unconnected-form').classList.add('hidden');
-        document.getElementById('auth-connected-badge').classList.remove('hidden');
-        document.getElementById('btn-refresh').disabled = false;
-        setExportButtonState(false);
-        
-        const creds = await storage.getCredentials().catch(() => null);
-        document.getElementById('connected-username').innerText = creds?.username ? `@${creds.username} ` : '';
-
-        showStatus('Loading cached data...', 'loading');
-        updateExtractionOverlay('Loading cached data...');
-        
-        // Try cache first
-        await loadCachedData();
-        
-        // If no cache, fetch from API and extract worker details
-        if (state.workers.length === 0) {
-          showStatus('No cached data found. Fetching from API...', 'loading');
-          await loadData();
-          
-          if (state.workers.length > 0 && state.isAuthenticated) {
-            await triggerExtraction(true);
-          } else {
-            hideExtractionOverlay();
-          }
-        } else {
-          hideExtractionOverlay();
-        }
-        
-        updateCacheIndicator();
-        showStatus(`Connected.`, 'success');
-         
-      } catch (error) {
-        console.error('Authentication error:', error);
-        hideExtractionOverlay();
-        showStatus(`Auth failed: ${error.message}. Check console for full API response.`, 'error');
-        state.isAuthenticated = false;
-      }
-    }
-
-    function handleDisconnect() {
-      state.isAuthenticated = false;
-      state.authToken = null;
-      state.userId = null;
-      state.userKey = null;
-      state.contracts = [];
-      state.projects = [];
-      state.workers = [];
-      
-      document.getElementById('auth-overlay').classList.remove('hidden');
-      document.getElementById('auth-unconnected-form').classList.remove('hidden');
-      document.getElementById('auth-connected-badge').classList.add('hidden');
-      document.getElementById('btn-refresh').disabled = true;
-      setExportButtonState(true);
-      document.getElementById('status-bar').classList.add('hidden');
-      
-      renderTreeSidebar();
-      renderTableHeader();
-      renderTableData();
-      renderHeaderStats();
-      
-      // Clear only auth session data, keep username for convenience
-      storage._delete('settings', 'authState').catch(() => {});
-    }
-
-    // ==================== DATA LOADING ====================
-    async function loadCachedData() {
-      try {
-        showStatus('Loading cached data...', 'loading');
-        updateExtractionOverlay('Loading cached data...');
-        
-        const allWorkers = [];
-        const projectsMap = new Map();
-        const contractsMap = new Map();
-        
-        const cachedProjects = await storage.getSetting('allProjects', []);
-        const cachedContracts = await storage.getSetting('allContracts', []);
-        
-        if (cachedProjects.length > 0) {
-          state.projects = cachedProjects;
-          state.contracts = cachedContracts;
-        }
-        
-        // Load all project summaries
-        const summaries = await storage._getAll('projectSummaries');
-        
-        for (const summary of summaries) {
-          if (!summary.data || !Array.isArray(summary.data)) continue;
-          
-          const projectNum = summary.projectNumber || summary.key?.replace('summary_', '');
-          if (!projectNum) continue;
-          
-          // Load worker details for this project
-          for (const worker of summary.data) {
-            const personnelNum = worker.personnelNumber;
-            if (!personnelNum) continue;
-            
-            const detail = await storage.getWorkerDetail(projectNum, personnelNum);
-            if (detail && detail.data) {
-              const rawRecord = extractFirstWorkerRecord(detail.data);
-              const normalized = normalizeWorkerDetail(rawRecord);
-              if (normalized) {
-                allWorkers.push({
-                  ...normalized,
-                  projectId: normalized.projectId || projectNum,
-                  projectName: normalized.projectName || worker.projectName || '',
-                  projectStatus: normalized.projectStatus || worker.projectStatus || '',
-                  contractNumber: normalized.contractNumber || worker.contractNumber || '',
-                  extractionStatus: 'Fresh',
-                  extractedAt: detail.extracted_at
-                });
-              }
-            } else {
-              // Fallback to summary data only
-              allWorkers.push({
-                ...worker,
-                projectId: worker.projectId || projectNum,
-                projectName: worker.projectName || '',
-                projectStatus: worker.projectStatus || '',
-                contractNumber: worker.contractNumber || '',
-                extractionStatus: 'Pending',
-                extractedAt: null
-              });
-            }
-          }
-          
-          // Track project metadata from summary if projects list was not cached
-          if (cachedProjects.length === 0 && summary.data.length > 0) {
-            const firstWorker = summary.data[0];
-            projectsMap.set(projectNum, {
-              projectNumber: projectNum,
-              projectName: firstWorker.projectName || '',
-              statusName: firstWorker.projectStatus || '',
-              integrationKey: '',
-              contractNumber: firstWorker.contractNumber || ''
-            });
-          }
-        }
-        
-        if (cachedProjects.length === 0) {
-          // Fallback: rebuild projects/contracts from summaries for old caches
-          for (const project of projectsMap.values()) {
-            if (project.contractNumber && !contractsMap.has(project.contractNumber)) {
-              contractsMap.set(project.contractNumber, {
-                contractNumber: project.contractNumber,
-                contractName: '',
-                integrationKey: ''
-              });
-            }
-          }
-          
-          state.projects = Array.from(projectsMap.values());
-          state.contracts = Array.from(contractsMap.values());
-        }
-        
-        state.workers = allWorkers;
-        state.workers.forEach(recalculateValidityDays);
-        
-        renderHeaderStats();
-        renderTableHeader();
-        renderTreeSidebar();
-        renderTableData();
-        populateMainStatusFilter();
-        updateCacheIndicator();
-        
-        if (state.workers.length > 0) {
-          showStatus(`Loaded ${state.workers.length} workers from cache.`, 'success');
-        } else {
-          showStatus('No cached data found. Click Refresh All to fetch from API.', 'info');
-        }
-        
-      } catch (error) {
-        console.error('[Cache] Error loading cached data:', error);
-        showStatus('Failed to load cached data.', 'error');
-      }
-    }
-
-    // ==================== DATA LOADING ====================
-    async function loadData() {
-      try {
-        showStatus('Fetching contracts...', 'loading');
-        
-        state.contracts = await api.getContracts(state.userKey);
-        showStatus(`Found ${state.contracts.length} contracts`, 'success');
-
-        showStatus('Fetching projects...', 'loading');
-        const allProjects = [];
-        for (const contract of state.contracts) {
-          const projects = await api.getProjects(contract.integrationKey);
-          projects.forEach(p => {
-            allProjects.push({
-              ...p,
-              contractNumber: contract.contractNumber,
-              contractName: contract.contractName
-            });
-          });
-        }
-        state.projects = allProjects;
-        showStatus(`Found ${state.projects.length} projects`, 'success');
-
-        showStatus('Fetching workers...', 'loading');
-        const allWorkers = [];
-        for (const project of state.projects) {
-          if (!project.integrationKey) {
-            console.warn('[DataLoad] Project missing integrationKey', project.projectNumber);
-            continue;
-          }
-          
-          const workers = await api.getWorkers(project.integrationKey);
-          if (Array.isArray(workers) && workers.length > 0 && workers[0].personnelNumber !== null) {
-            const enrichedWorkers = workers.map(w => ({
-              ...w,
-              projectId: project.projectNumber,
-              projectName: project.projectName,
-              projectStatus: project.statusName,
-              contractNumber: project.contractNumber
-            }));
-            await storage.saveProjectSummary(project.projectNumber, enrichedWorkers);
-            
-            enrichedWorkers.forEach(w => {
-              allWorkers.push({
-                ...w,
-                extractionStatus: 'Pending',
-                extractedAt: null
-              });
-            });
-          }
-        }
-        state.workers = allWorkers;
-        state.workers.forEach(recalculateValidityDays);
-        showStatus(`Found ${state.workers.length} workers. Ready for extraction.`, 'success');
-
-        await storage.saveSetting('allProjects', state.projects);
-        await storage.saveSetting('allContracts', state.contracts);
-        await storage.saveSetting('cacheLastUpdated', new Date().toISOString());
-
-        renderHeaderStats();
-        renderTreeSidebar();
-        renderTableData();
-        populateMainStatusFilter();
-
-      } catch (error) {
-        console.error('[DataLoad] Error:', error);
-        showStatus(`Data load failed: ${error.message}`, 'error');
-        throw error;
-      }
-    }
-
-    // ==================== DATA NORMALIZATION ====================
-    function normalizeWorkerDetail(raw) {
-      if (!raw || typeof raw !== 'object') return raw;
-      
-      const project = raw.project && typeof raw.project === 'object' ? raw.project : {};
-      const nationality = raw.nationality || raw.country || '';
-      
-      const result = { ...raw, nationality };
-      if (project.projectNumber || raw.projectId) result.projectId = project.projectNumber || raw.projectId;
-      if (project.projectName || raw.projectName) result.projectName = project.projectName || raw.projectName;
-      if (project.statusName || raw.projectStatus) result.projectStatus = project.statusName || raw.projectStatus;
-      if (project.contractNumber || raw.contractNumber) result.contractNumber = project.contractNumber || raw.contractNumber;
-      if (raw.workerIntegrationKey) result.workerIntegrationKey = raw.workerIntegrationKey;
-      return result;
-    }
-
-    function extractFirstWorkerRecord(details) {
-      if (!details || typeof details !== 'object') return null;
-      if (Array.isArray(details)) return details[0] || null;
-      if (Array.isArray(details.data)) return details.data[0] || null;
-      if (details.data && typeof details.data === 'object') return details.data;
-      return details;
-    }
-
-    function formatDate(value) {
-      if (!value) return '--';
-      const str = String(value);
-      if (str.includes('T')) {
-        return str.split('T')[0];
-      }
-      return str;
-    }
-
-    function recalculateValidityDays(worker) {
-      const oneDayMs = 24 * 60 * 60 * 1000;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (worker.passportExpirationDate) {
-        const expiry = new Date(worker.passportExpirationDate);
-        const diff = Math.ceil((expiry - today) / oneDayMs);
-        worker.passportValidity = isNaN(diff) ? worker.passportValidity : diff + 1;
-      }
-
-      if (worker.iqamaExpiryDate) {
-        const expiry = new Date(worker.iqamaExpiryDate);
-        const diff = Math.ceil((expiry - today) / oneDayMs);
-        worker.iqamaValidity = isNaN(diff) ? worker.iqamaValidity : diff + 1;
-      }
-    }
-
-    // ==================== EXTRACTION PIPELINE ====================
-    async function triggerExtraction(forceRefresh = false) {
-      if (!state.isAuthenticated || state.isExtracting) {
-        return;
-      }
-
-      state.isExtracting = true;
-      setRefreshButtonState(true);
-
-      showExtractionOverlay('Fetching worker details...');
-      renderHeaderStats();
-      renderTreeSidebar();
-      renderTableData();
-
-      let fresh = 0, saved = 0, skipped = 0, failed = 0;
-
-      try {
-        const projects = state.projects;
-        const validProjects = projects.filter(p => p.integrationKey);
-        showStatus(`Fetching worker lists for ${validProjects.length} projects...`, 'loading');
-        updateExtractionOverlay(`Fetching worker lists for ${validProjects.length} projects...`);
-
-        const projectWorkerLists = await Promise.all(validProjects.map(project =>
-          api.getWorkers(project.integrationKey)
-            .then(workers => ({ project, workers }))
-            .catch(error => {
-              console.error('[Extraction] Failed to fetch workers for project', project.projectNumber, ':', error);
-              showStatus(`Failed to fetch workers for project ${project.projectNumber}`, 'error');
-              return { project, workers: [] };
-            })
-        ));
-
-        let processedProjects = 0;
-        for (const { project, workers } of projectWorkerLists) {
-          processedProjects++;
-          showStatus(`Processing project ${project.projectNumber} (${processedProjects}/${validProjects.length})...`, 'loading');
-          updateExtractionOverlay(`Processing project ${project.projectNumber} (${processedProjects}/${validProjects.length})...`);
-
-          if (!Array.isArray(workers) || workers.length === 0 || workers[0].personnelNumber === null) {
-            continue;
-          }
-
-          const pendingWorkers = [];
-          for (const worker of workers) {
-            const personnelNum = worker.personnelNumber;
-            const workerKey = worker.workerIntegrationKey;
-
-            if (!personnelNum || !workerKey) {
-              failed++;
-              continue;
-            }
-
-            const target = state.workers.find(w => w.personnelNumber === personnelNum);
-            if (!target) {
-              const newTarget = {
-                ...worker,
-                projectId: project.projectNumber,
-                projectName: project.projectName,
-                projectStatus: project.statusName,
-                contractNumber: project.contractNumber,
-                extractionStatus: 'Pending',
-                extractedAt: null
-              };
-              state.workers.push(newTarget);
-              pendingWorkers.push({ project, worker, target: newTarget, personnelNum, workerKey });
-              continue;
-            }
-
-            if (!forceRefresh) {
-              const existing = await storage.getWorkerDetail(project.projectNumber, personnelNum);
-              if (existing) {
-                skipped++;
-                const normalized = normalizeWorkerDetail(existing.data?.[0] || existing.data || existing);
-                target.extractionStatus = 'Fresh';
-                target.extractedAt = existing.extracted_at;
-                if (normalized) Object.assign(target, normalized);
-                continue;
-              }
-            }
-
-            pendingWorkers.push({ project, worker, target, personnelNum, workerKey });
-          }
-
-          if (pendingWorkers.length === 0) {
-            continue;
-          }
-
-          if (state.parallelEnabled) {
-            const batchSize = Math.max(1, state.threadCount || 1);
-            for (let i = 0; i < pendingWorkers.length; i += batchSize) {
-              const batch = pendingWorkers.slice(i, i + batchSize);
-              await Promise.all(batch.map(processWorkerItem));
-              state.workers.forEach(recalculateValidityDays);
-              renderTableData();
-            }
-          } else {
-            for (const item of pendingWorkers) {
-              await processWorkerItem(item);
-              recalculateValidityDays(item.target);
-              renderTableData();
-            }
-          }
-        }
-
-        state.metrics = { fresh, saved, skipped, failed };
-
-        showStatus(`Extraction complete.`, 'success');
-      } catch (error) {
-        console.error('Extraction error:', error);
-        showStatus(`Extraction failed: ${error.message}`, 'error');
-      } finally {
-        state.isExtracting = false;
-        setRefreshButtonState(false);
-        hideExtractionOverlay();
-
-        state.workers.forEach(recalculateValidityDays);
-        renderHeaderStats();
-        renderTreeSidebar();
-        renderTableData();
-        updateCacheIndicator();
-        populateMainStatusFilter();
-      }
-    }
-
-    function showExtractionOverlay(message = 'Fetching worker details...') {
-      const overlay = document.getElementById('extraction-overlay');
-      const msgEl = document.getElementById('extraction-overlay-message');
-      if (msgEl && message) msgEl.innerText = message;
-      if (overlay) overlay.classList.remove('hidden');
-    }
-
-    function updateExtractionOverlay(message) {
-      const msgEl = document.getElementById('extraction-overlay-message');
-      if (msgEl && message) msgEl.innerText = message;
-    }
-
-    function hideExtractionOverlay() {
-      const overlay = document.getElementById('extraction-overlay');
-      if (overlay) overlay.classList.add('hidden');
-    }
-
-    function setRefreshButtonState(isLoading) {
-      const btnRefresh = document.getElementById('btn-refresh');
-      const refreshIcon = document.getElementById('refresh-icon');
-      const refreshLabel = document.getElementById('refresh-label');
-      if (!btnRefresh || !refreshIcon || !refreshLabel) return;
-
-      btnRefresh.disabled = isLoading;
-      if (isLoading) {
-        refreshIcon.classList.add('animate-spin');
-        refreshLabel.innerText = 'Extracting...';
-      } else {
-        refreshIcon.classList.remove('animate-spin');
-        refreshLabel.innerText = 'Refresh All';
-      }
-    }
-
-    function setExportButtonState(isDisabled) {
-      const btnExport = document.getElementById('btn-export');
-      if (btnExport) btnExport.disabled = isDisabled;
-    }
-
-    async function processWorkerItem({ project, worker, target, personnelNum, workerKey }) {
-      try {
-        const details = await api.getWorkerDetails(workerKey);
-        await storage.saveWorkerDetail(project.projectNumber, personnelNum, details);
-
-        const rawRecord = extractFirstWorkerRecord(details);
-        let hasData = false;
-        if (rawRecord && typeof rawRecord === 'object' && !Array.isArray(rawRecord)) {
-          hasData = Object.values(rawRecord).some(v => v !== '' && v !== null && v !== undefined);
-        }
-        const normalized = hasData ? normalizeWorkerDetail(rawRecord) : null;
-
-        if (normalized) {
-          target.extractionStatus = 'Saved';
-          target.extractedAt = new Date().toISOString();
-          Object.assign(target, normalized);
-          state.metrics.saved = (state.metrics.saved || 0) + 1;
-        } else {
-          console.warn('[Extraction] No normalized data for', personnelNum);
-          target.extractionStatus = 'Failed';
-          target.extractedAt = new Date().toISOString();
-          state.metrics.failed = (state.metrics.failed || 0) + 1;
-        }
-      } catch (error) {
-        console.error('[Extraction] Failed for', personnelNum, ':', error);
-        target.extractionStatus = 'Failed';
-        target.extractedAt = new Date().toISOString();
-        state.metrics.failed = (state.metrics.failed || 0) + 1;
-      }
-    }
-
-    // ==================== EXPORT FUNCTIONS ====================
-    function exportToExcel() {
-      const dataset = getFilteredAndSortedWorkers();
-      if (!dataset.length) {
-        alert('No data to export');
-        return;
-      }
-
-      const dateFields = new Set([
-        'Date of Birth',
-        'Date of Join',
-        'Passport Expiry',
-        'Iqama Expiry',
-        'Cont. Start',
-        'Cont. End'
-      ]);
-      const dateKeys = new Set([
-        'dateOfBirth',
-        'dateOfJoin',
-        'passportExpirationDate',
-        'iqamaExpiryDate',
-        'contractStartDate',
-        'contractEndDate'
-      ]);
-
-      function toExcelDate(value) {
-        if (!value) return '';
-        const str = String(value);
-        if (str.includes('T')) {
-          const d = new Date(str);
-          return isNaN(d.getTime()) ? value : d;
-        }
-        const parts = str.split('-');
-        if (parts.length === 3) {
-          const d = new Date(`${parts[0]}-${parts[1]}-${parts[2]}T00:00:00`);
-          return isNaN(d.getTime()) ? value : d;
-        }
-        return value;
-      }
-
-      // Prepare data for export
-      const exportData = dataset.map((worker, idx) => {
-        const row = { '#': idx + 1 };
-        gridColumns.forEach(col => {
-          if (col.key === 'index') return;
-          const value = worker[col.key] ?? '';
-          row[col.label] = dateKeys.has(col.key) ? toExcelDate(value) : value;
-        });
-        return row;
-      });
-
-      // Create workbook
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Master Worker Data');
-
-      // Auto-size columns
-      const maxWidth = 50;
-      ws.columns = Object.keys(exportData[0]).map(key => ({
-        width: Math.min(maxWidth, Math.max(key.length, ...exportData.map(row => String(row[key] || '').length)) + 2)
-      }));
-
-      // Apply date format to date columns
-      if (ws['!ref']) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        const headerRow = range.s.r;
-        for (let c = range.s.c; c <= range.e.c; c++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: headerRow, c });
-          const header = ws[cellAddress]?.w || '';
-          if (dateFields.has(header)) {
-            for (let r = range.s.r + 1; r <= range.e.r; r++) {
-              const addr = XLSX.utils.encode_cell({ r, c });
-              const cell = ws[addr];
-              if (cell && cell.v && cell.v instanceof Date) {
-                cell.z = 'YYYY-MM-DD';
-              }
-            }
-          }
-        }
-      }
-
-      // Download
-      const date = new Date().toISOString().split('T')[0];
-      XLSX.writeFile(wb, `smasco_master_workers_${date}.xlsx`);
-    }
-
-    // ==================== EVENT HANDLERS ====================
-    function setScope(type, id) {
-      state.selectedScope = { type, id };
-      state.currentPage = 1;
-      
-      const countLabel = document.getElementById('scope-count');
-      if (type === 'ALL') countLabel.innerText = 'All';
-      else if (type === 'CONTRACT') countLabel.innerText = id;
-      else if (type === 'PROJECT') countLabel.innerText = id;
-
-      renderTreeSidebar();
-      renderTableData();
-    }
-
-    function handleGridSearch(val) {
-      state.gridSearch = val;
-      state.currentPage = 1;
-      renderTableData();
-    }
-
-    function handleJobProfessionFilter(val) {
-      state.jobProfessionFilter = val;
-      state.currentPage = 1;
-      renderTableData();
-    }
-
-    function handleMainStatusFilter(val) {
-      state.mainStatusFilter = val;
-      state.currentPage = 1;
-      renderTableData();
-    }
-
-    function toggleColumnVisibility() {
-      const modal = document.getElementById('column-modal');
-      const container = document.getElementById('column-checkboxes');
-      if (!modal || !container) return;
-
-      container.innerHTML = gridColumns
-        .filter(col => col.key !== 'index')
-        .map((col, idx) => {
-          const checked = !state.hiddenColumns.has(col.key);
-          return `
-            <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-              <input type="checkbox" data-col-key="${col.key}" ${checked ? 'checked' : ''} class="rounded border-slate-300 text-slate-600 focus:ring-slate-500" />
-              <span>${col.label}</span>
-            </label>
-          `;
-        }).join('');
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeColumnModal() {
-      const modal = document.getElementById('column-modal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function showAllColumns() {
-      state.hiddenColumns.clear();
-      closeColumnModal();
-      renderTableHeader();
-      renderTableData();
-    }
-
-    function applyColumnVisibility() {
-      const checkboxes = document.querySelectorAll('#column-checkboxes input[type="checkbox"]');
-      state.hiddenColumns.clear();
-      checkboxes.forEach(cb => {
-        if (!cb.checked) {
-          state.hiddenColumns.add(cb.dataset.colKey);
-        }
-      });
-      closeColumnModal();
-      renderTableHeader();
-      renderTableData();
-    }
-
-    function showRefreshModal() {
-      const modal = document.getElementById('refresh-modal');
-      if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeRefreshModal() {
-      const modal = document.getElementById('refresh-modal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    async function refreshFromCache() {
-      closeRefreshModal();
-      
-      try {
-        await loadCachedData();
-        updateCacheIndicator();
-        showStatus(`Loaded ${state.workers.length} workers from cache.`, 'success');
-      } catch (error) {
-        console.error('Cache refresh error:', error);
-        showStatus(`Cache refresh failed: ${error.message}`, 'error');
-      }
-    }
-
-    async function refreshFromAPI() {
-      closeRefreshModal();
-      showExtractionOverlay('Fetching fresh data from API...');
-      
-      try {
-        // Clear existing data
-        state.workers = [];
-        state.projects = [];
-        state.contracts = [];
-        
-        renderHeaderStats();
-        renderTreeSidebar();
-        renderTableData();
-        
-        // Fetch fresh data
-        await loadData();
-        
-        if (state.workers.length > 0 && state.isAuthenticated) {
-          await triggerExtraction(true);
-        } else {
-          hideExtractionOverlay();
-        }
-        
-        updateCacheIndicator();
-        showStatus(`Loaded ${state.workers.length} workers from API.`, 'success');
-      } catch (error) {
-        console.error('API refresh error:', error);
-        hideExtractionOverlay();
-        showStatus(`API refresh failed: ${error.message}`, 'error');
-      }
-    }
-
-    function toggleSidebar() {
-      state.sidebarCollapsed = !state.sidebarCollapsed;
-      const sidebar = document.getElementById('sidebar');
-      const header = document.getElementById('sidebar-header');
-      const expandBtn = document.getElementById('sidebar-expand-btn');
-      
-      if (state.sidebarCollapsed) {
-        sidebar.style.width = '64px';
-        if (header) header.classList.add('hidden');
-        if (expandBtn) expandBtn.classList.remove('hidden');
-      } else {
-        sidebar.style.width = '312px';
-        if (header) header.classList.remove('hidden');
-        if (expandBtn) expandBtn.classList.add('hidden');
-      }
-      
-      lucide.createIcons();
-      storage.saveSetting('sidebarCollapsed', state.sidebarCollapsed);
-    }
-
-    function toggleZeroWorkersFilter() {
-      state.hideZeroWorkerProjects = !state.hideZeroWorkerProjects;
-      const eyeBtn = document.getElementById('zero-workers-toggle');
-      
-      if (state.hideZeroWorkerProjects) {
-        if (eyeBtn) {
-          eyeBtn.innerHTML = '<i data-lucide="eye" class="w-3.5 h-3.5"></i>';
-          eyeBtn.setAttribute('title', 'Show projects with 0 workers');
-        }
-      } else {
-        if (eyeBtn) {
-          eyeBtn.innerHTML = '<i data-lucide="eye-off" class="w-3.5 h-3.5"></i>';
-          eyeBtn.setAttribute('title', 'Hide projects with 0 workers');
-        }
-      }
-      
-      lucide.createIcons();
-      storage.saveSetting('hideZeroWorkerProjects', state.hideZeroWorkerProjects);
-      renderTreeSidebar();
-    }
-
-    function filterScopeTree(val) {
-      state.treeSearch = val.toLowerCase();
-      renderTreeSidebar();
-    }
-
-    function populateMainStatusFilter() {
-      const statuses = new Set();
-      state.workers.forEach(w => {
-        const status = String(w.mainStatusName || '').trim();
-        if (status) statuses.add(status);
-      });
-
-      const sorted = Array.from(statuses).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-      const select = document.getElementById('main-status-filter');
-      if (!select) return;
-
-      select.innerHTML = '<option value="">All Status</option>' +
-        sorted.map(status => `<option value="${status}">${status}</option>`).join('');
-    }
-
-    function resetFilters() {
-      state.gridSearch = '';
-      state.jobProfessionFilter = '';
-      state.mainStatusFilter = '';
-      state.selectedScope = { type: 'ALL', id: null };
-      document.getElementById('grid-search').value = '';
-      document.getElementById('tree-search').value = '';
-      const jobFilter = document.getElementById('job-profession-filter');
-      if (jobFilter) jobFilter.value = '';
-      const statusFilter = document.getElementById('main-status-filter');
-      if (statusFilter) statusFilter.value = '';
-      state.treeSearch = '';
-      state.currentPage = 1;
-      renderTreeSidebar();
-      renderTableData();
-    }
-
-    function handleSort(key) {
-      if (state.sortConfig.key === key) {
-        state.sortConfig.direction = state.sortConfig.direction === 'asc' ? 'desc' : 'asc';
-      } else {
-        state.sortConfig.key = key;
-        state.sortConfig.direction = 'asc';
-      }
-      renderTableHeader();
-      renderTableData();
-    }
-
-    function changePageSize(size) {
-      const parsed = parseInt(size, 10);
-      state.pageSize = parsed;
-      state.currentPage = 1;
-      storage.saveSetting('pageSize', parsed);
-      renderTableData();
-    }
-
-    function prevPage() {
-      if (state.currentPage > 1) {
-        state.currentPage--;
-        renderTableData();
-      }
-    }
-
-    function nextPage() {
-      const dataset = getFilteredAndSortedWorkers();
-      const totalPages = Math.ceil(dataset.length / state.pageSize);
-      if (state.currentPage < totalPages) {
-        state.currentPage++;
-        renderTableData();
-      }
-    }
-
-    function toggleParallel(enabled) {
-      state.parallelEnabled = enabled;
-      document.getElementById('slider-threads').disabled = !enabled;
-      storage.saveSetting('parallelEnabled', enabled);
-    }
-
-    function updateThreads(val) {
-      const parsed = parseInt(val, 10);
-      state.threadCount = parsed;
-      document.getElementById('thread-count-disp').innerText = val;
-      storage.saveSetting('threadCount', parsed);
-    }
-
-    async function updateCacheIndicator() {
-      const cacheWorkersEl = document.getElementById('cache-workers');
-      const cacheProjectsEl = document.getElementById('cache-projects');
-      const cacheLastUpdatedEl = document.getElementById('cache-last-updated');
-      
-      if (cacheWorkersEl) {
-        cacheWorkersEl.innerHTML = `<i data-lucide="users" class="w-3 h-3"></i> Workers: <span class="font-mono font-medium">${state.workers.length}</span>`;
-      }
-      if (cacheProjectsEl) {
-        cacheProjectsEl.innerHTML = `<i data-lucide="folder" class="w-3 h-3"></i> Projects: <span class="font-mono font-medium">${state.projects.length}</span>`;
-      }
-      if (cacheLastUpdatedEl) {
-        const stored = await storage.getSetting('cacheLastUpdated');
-        const now = stored ? new Date(stored) : new Date();
-        cacheLastUpdatedEl.innerText = `Last updated: ${now.toLocaleTimeString()}`;
-      }
-      
-      if (cacheWorkersEl || cacheProjectsEl || cacheLastUpdatedEl) {
-        lucide.createIcons();
-      }
-    }
-
-    async function clearCache() {
-      if (!confirm('Clear all cached data? This will remove all stored worker details and project summaries.')) {
-        return;
-      }
-      
-      try {
-        await storage._clear('workerDetails');
-        await storage._clear('projectSummaries');
-        await storage._delete('settings', 'allProjects').catch(() => {});
-        await storage._delete('settings', 'allContracts').catch(() => {});
-        await storage.saveSetting('cacheLastUpdated', null);
-        
-        state.workers = [];
-        state.projects = [];
-        state.contracts = [];
-        
-        renderHeaderStats();
-        renderTreeSidebar();
-        renderTableData();
-        updateCacheIndicator();
-        
-        showStatus('Cache cleared successfully.', 'success');
-      } catch (error) {
-        console.error('Failed to clear cache:', error);
-        showStatus('Failed to clear cache.', 'error');
-      }
-    }
-
-    // Modal Details Control
-    function openWorkerModal(worker) {
-      document.getElementById('modal-worker-name').innerText = worker.workerName || 'Unknown';
-      document.getElementById('modal-personnel-no').innerText = worker.personnelNumber || 'N/A';
-      document.getElementById('modal-main-status').innerText = worker.mainStatusName || 'Unknown';
-      document.getElementById('modal-profession').innerText = worker.jobProfession || 'Unknown';
-      document.getElementById('modal-salary').innerText = `SAR ${worker.salary || '0.00'}`;
-      document.getElementById('modal-iqama').innerText = worker.iqamaNumber || '--';
-      document.getElementById('modal-iqama-exp').innerText = `${formatDate(worker.iqamaExpiryDate)} (${worker.iqamaValidity || '--'}d validity)`;
-      document.getElementById('modal-passport').innerText = worker.passportNumber || '--';
-      document.getElementById('modal-passport-exp').innerText = `${formatDate(worker.passportExpirationDate)} (${worker.passportValidity || '--'}d validity)`;
-      document.getElementById('modal-nationality').innerText = worker.nationality || '--';
-      document.getElementById('modal-mobile').innerText = worker.mobile || '--';
-      document.getElementById('modal-dob').innerText = `${formatDate(worker.dateOfBirth)} (Age ${worker.age || '--'})`;
-      document.getElementById('modal-gender-rel').innerText = `${worker.gender || '--'} / ${worker.religion || '--'}`;
-      document.getElementById('modal-proj-id').innerText = worker.projectId || '--';
-      document.getElementById('modal-proj-name').innerText = worker.projectName || '--';
-
-      document.getElementById('worker-modal').classList.remove('hidden');
-    }
-
-    function closeWorkerModal() {
-      document.getElementById('worker-modal').classList.add('hidden');
-    }
-
-    // ==================== INITIALIZATION ====================
     window.addEventListener('DOMContentLoaded', async () => {
+      state.selectedScope = { type: 'ALL', id: null };
       await settings.load();
       await storage.migrateFromLocalStorage();
-      
-      // Apply sidebar state
+
       if (state.sidebarCollapsed) {
         const sidebar = document.getElementById('sidebar');
         const header = document.getElementById('sidebar-header');
@@ -2280,32 +2350,30 @@
         if (header) header.classList.add('hidden');
         if (expandBtn) expandBtn.classList.remove('hidden');
       }
-      
-      // Restore saved credentials
+
       const creds = await storage.getCredentials();
       if (creds) {
         document.getElementById('auth-username').value = creds.username || '';
       }
-      
-      // Check for saved auth state
-      const authState = await storage.getSetting('authState', null);
+
+      const authState = await storage.getSetting(STORAGE_KEYS.AUTH_STATE, null);
       if (authState && authState.isAuthenticated) {
         state.authToken = authState.authToken;
         state.userId = authState.userId;
         state.userKey = authState.userKey;
         state.isAuthenticated = true;
-        
-        // Show connected UI
+        state.selectedScope = { type: 'ALL', id: null };
+
         document.getElementById('auth-overlay').classList.add('hidden');
         document.getElementById('auth-unconnected-form').classList.add('hidden');
         document.getElementById('auth-connected-badge').classList.remove('hidden');
-        document.getElementById('btn-refresh').disabled = false;
-        setExportButtonState(false);
-        
+        setButtonState('btn-refresh', { disabled: false });
+        setButtonState('btn-export', { disabled: false });
+        setButtonState('btn-validate', { disabled: false });
+
         const restoredCreds = await storage.getCredentials().catch(() => null);
         document.getElementById('connected-username').innerText = restoredCreds?.username ? `@${restoredCreds.username} ` : '';
-        
-        // Load cached data
+
         await loadCachedData();
         updateCacheIndicator();
         showStatus(`Connected. Showing cached data. Click Refresh All to fetch latest.`, 'success');
@@ -2314,13 +2382,12 @@
         renderTableHeader();
         renderTreeSidebar();
         renderTableData();
-        
-        // Show initial status
         document.getElementById('status-bar').classList.remove('hidden');
         document.getElementById('status-icon').innerHTML = '<span class="text-slate-400">ℹ</span>';
         document.getElementById('status-message').innerText = 'Ready - Enter credentials and click Connect';
       }
-      
+
+      initOfflineMode();
       lucide.createIcons();
     });
   </script>
