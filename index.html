@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
 <head>
@@ -1510,6 +1511,7 @@
         }
         
         state.workers = allWorkers;
+        state.workers.forEach(recalculateValidityDays);
         
         renderHeaderStats();
         renderTableHeader();
@@ -1582,6 +1584,7 @@
           }
         }
         state.workers = allWorkers;
+        state.workers.forEach(recalculateValidityDays);
         showStatus(`Found ${state.workers.length} workers. Ready for extraction.`, 'success');
 
         await storage.saveSetting('allProjects', state.projects);
@@ -1743,11 +1746,13 @@
             for (let i = 0; i < pendingWorkers.length; i += batchSize) {
               const batch = pendingWorkers.slice(i, i + batchSize);
               await Promise.all(batch.map(processWorkerItem));
+              state.workers.forEach(recalculateValidityDays);
               renderTableData();
             }
           } else {
             for (const item of pendingWorkers) {
               await processWorkerItem(item);
+              recalculateValidityDays(item.target);
               renderTableData();
             }
           }
@@ -1764,6 +1769,7 @@
         setRefreshButtonState(false);
         hideExtractionOverlay();
 
+        state.workers.forEach(recalculateValidityDays);
         renderHeaderStats();
         renderTreeSidebar();
         renderTableData();
@@ -2215,6 +2221,8 @@
       try {
         await storage._clear('workerDetails');
         await storage._clear('projectSummaries');
+        await storage._delete('settings', 'allProjects').catch(() => {});
+        await storage._delete('settings', 'allContracts').catch(() => {});
         await storage.saveSetting('cacheLastUpdated', null);
         
         state.workers = [];
