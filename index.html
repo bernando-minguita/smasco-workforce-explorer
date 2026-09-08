@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SMASCO Workforce Explorer</title>
-  <link rel="icon" href="https://www.smasco.com/wp-content/uploads/2023/02/cropped-favicon-32x32.png" sizes="32x32" />
-  <link rel="icon" href="https://www.smasco.com/wp-content/uploads/2023/02/cropped-favicon-192x192.png" sizes="192x192" />
+  <link rel="icon" href="https://customerportal.smasco.com/favicon.ico" sizes="32x32" />
+  <link rel="icon" href="https://customerportal.smasco.com/favicon.ico" sizes="192x192" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -25,10 +27,20 @@
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a2b8; }
     .sticky-col-0 { position: sticky; left: 0; z-index: 20; }
     .sticky-col-1 { position: sticky; left: 40px; z-index: 20; }
     .sticky-col-2 { position: sticky; left: 152px; z-index: 20; }
+
+    #payslip-modal .payslip-integration-key { display: none; }
+    #payslip-modal th.payslip-integration-key,
+    #payslip-modal td.payslip-integration-key { display: none; }
+    #payslip-modal th:nth-child(5),
+    #payslip-modal td:nth-child(5) { display: none; }
+
+    @media print {
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="h-full flex flex-col font-sans text-slate-800 text-sm antialiased overflow-hidden select-none">
@@ -39,7 +51,7 @@
       <div class="flex items-center justify-between px-5 py-3 border-b border-blue-100">
         <div class="flex items-center gap-3">
           <div class="p-1.5 rounded-lg flex items-center justify-center">
-            <img src="https://www.smasco.com/wp-content/uploads/2023/02/cropped-favicon-32x32.png" alt="SMASCO" class="w-6 h-6 object-contain" />
+            <img src="https://customerportal.smasco.com/favicon.ico" alt="SMASCO" class="w-6 h-6 object-contain" />
           </div>
           <div>
             <h1 class="text-base font-bold text-slate-900 tracking-tight leading-tight flex items-center gap-2">
@@ -97,6 +109,10 @@
           </span>
         </div>
         <div class="flex items-center gap-2">
+          <button id="btn-payslip" onclick="openPayslipModal()" disabled class="flex items-center gap-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed px-3.5 py-1 rounded text-xs font-medium transition-all shadow-sm">
+            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+            <span>Payslip</span>
+          </button>
           <button id="btn-validate" onclick="openValidationDashboard()" disabled class="flex items-center gap-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed px-3.5 py-1 rounded text-xs font-medium transition-all shadow-sm">
             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
             <span>Validation Dashboard</span>
@@ -447,6 +463,80 @@
       </div>
     </div>
 
+    <!-- Payslip Modal -->
+    <div id="payslip-modal" class="hidden fixed inset-0 z-50 bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 w-full max-w-5xl max-h-[85vh] flex flex-col">
+        <div class="p-4 bg-blue-600 text-white flex items-center justify-between border-b border-blue-700 select-text">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-500/30 border border-blue-400/40 rounded-lg text-blue-100">
+              <i data-lucide="receipt" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm">Payslip Lookup</h3>
+              <p class="text-xs text-blue-100">Select a worker to request a one-time payslip access token</p>
+            </div>
+          </div>
+          <button onclick="closeModal('payslip-modal')" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-4 text-xs text-slate-700">
+          <div class="flex items-center gap-3">
+            <input id="payslip-search" type="text" placeholder="Search by personnel number..." oninput="renderPayslipGrid(this.value)" class="border border-blue-200 rounded-lg px-3 py-1.5 text-xs w-64 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <span id="payslip-count" class="text-xs text-slate-500"></span>
+          </div>
+          <div class="border border-blue-100 rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-blue-50/80 border-b border-blue-200">
+                <tr class="text-xs font-semibold text-slate-800">
+                  <th class="px-3 py-2">Personnel #</th>
+                  <th class="px-3 py-2">Worker Name</th>
+                  <th class="px-3 py-2">Iqama #</th>
+                  <th class="px-3 py-2">Profession</th>
+                  <th class="px-3 py-2">Integration Key</th>
+                  <th class="px-3 py-2 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="payslip-grid" class="divide-y divide-blue-50"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="p-4 bg-blue-50 border-t border-blue-100 flex justify-end">
+          <button onclick="closeModal('payslip-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payslip Period Modal -->
+    <div id="payslip-period-modal" class="hidden fixed inset-0 z-[60] bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 w-full max-w-md flex flex-col">
+        <div class="p-4 bg-blue-600 text-white flex items-center justify-between border-b border-blue-700">
+          <div>
+            <h3 class="font-bold text-sm">Select Payslip Period</h3>
+            <p id="payslip-period-worker" class="text-xs text-blue-100"></p>
+          </div>
+          <button onclick="closeModal('payslip-period-modal')" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4 text-xs text-slate-700">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Year</label>
+            <select id="payslip-year" class="border border-blue-200 rounded-lg px-3 py-1.5 text-xs w-full bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Month</label>
+            <select id="payslip-month" class="border border-blue-200 rounded-lg px-3 py-1.5 text-xs w-full bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+          </div>
+          <div id="payslip-error" class="hidden text-red-600 text-xs"></div>
+        </div>
+        <div class="p-4 bg-blue-50 border-t border-blue-100 flex justify-end gap-2">
+          <button onclick="closeModal('payslip-period-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">Cancel</button>
+          <button id="btn-view-payslip" onclick="handlePayslipAction('view')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-xs transition-colors">View</button>
+        </div>
+      </div>
+    </div>
+
     <!-- No Data Modal -->
     <div id="no-data-modal" class="hidden fixed inset-0 bg-blue-900/20 backdrop-blur-sm z-50 flex items-center justify-center">
       <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 p-6 max-w-sm w-full mx-4">
@@ -465,6 +555,25 @@
         <div class="flex justify-end">
           <button onclick="closeModal('no-data-modal')" class="px-4 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md font-medium text-xs transition-colors">OK</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Payslip Viewer Modal -->
+    <div id="payslip-viewer-modal" class="hidden fixed inset-0 z-[70] bg-blue-900/20 backdrop-blur-xs flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-blue-200 w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="p-4 bg-blue-600 text-white flex items-center justify-between border-b border-blue-700">
+          <div>
+            <h3 class="font-bold text-sm">Payslip</h3>
+            <p id="payslip-viewer-subtitle" class="text-xs text-blue-100"></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="printPayslip()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-400 text-white rounded-md text-xs font-medium transition-colors">Print / Save PDF</button>
+            <button onclick="closeModal('payslip-viewer-modal')" class="p-1 rounded-lg text-blue-100 hover:text-white hover:bg-blue-700 transition-colors">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+        <div id="payslip-viewer-content" class="flex-1 overflow-y-auto p-5 text-xs text-slate-700"></div>
       </div>
     </div>
   </div>
@@ -529,21 +638,32 @@
               delete options.params;
             }
             showStatus(`API Request: ${finalUrl.split('/').pop()}... (attempt ${attempt}/${maxRetries})`, 'loading');
+            const headers = {
+              'Accept': 'application/json, text/plain, */*',
+              'Content-Type': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              ...options.headers
+            };
+            if (state.authToken) {
+              headers['Authorization'] = `Bearer ${state.authToken}`;
+            }
             const response = await fetch(finalUrl, {
               ...options,
               signal: controller.signal,
-              headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                ...options.headers
-              }
+              headers
             });
             clearTimeout(timeoutId);
             if (!response.ok) {
               const text = await response.text();
               const error = new Error(`HTTP ${response.status}: ${response.statusText}. Response: ${text.substring(0, 200)}`);
               error.status = response.status;
+              if (response.status === 401) {
+                handleSessionExpired();
+              } else if (response.status === 400 && text.includes('No Data Found')) {
+                const noDataError = new Error('No payslip available for the selected period.');
+                noDataError.status = 400;
+                throw noDataError;
+              }
               throw error;
             }
             const data = await response.json();
@@ -608,6 +728,22 @@
         const url = `${API_BASE}/AxApiServices/GetWorkerProjectDetails`;
         const data = await this.request(url, { method: 'GET', params: { workerIntegrationKey: workerKey } });
         return data || {};
+      },
+
+      async getPaySlipOneTimeAccessToken(workerKey, year, month) {
+        const encodedKey = encodeURIComponent(workerKey);
+        const url = `${API_BASE}/Workers/PaySlipOneTimeAccessToken/${encodedKey}/${year}/${month}`;
+        const data = await this.request(url, { method: 'GET' });
+        return data || {};
+      },
+
+      async getWorkerPaySlipFromAX(token) {
+        const url = `${API_BASE}/Workers/GetWorkerPaySlipFromAX/${token}`;
+        const data = await this.request(url, { method: 'GET' });
+        if (data.statusCode !== 200 || !data.result) {
+          throw new Error(data.errorMessage || 'No payslip data available');
+        }
+        return data.result;
       }
     };
 
@@ -735,6 +871,11 @@
         return null;
       },
 
+      async getWorkerDetailAnyDate(projectNum, personnelNum) {
+        const key = `worker_${projectNum}_${personnelNum}`;
+        return this._get('workerDetails', key);
+      },
+
       async saveProjectSummary(projectNum, data) {
         const key = `summary_${projectNum}`;
         const result = await this._put('projectSummaries', { key, projectNumber: projectNum, extracted_at: new Date().toISOString(), data });
@@ -812,7 +953,9 @@
       activeAbortController: null,
       searchDebounceTimer: null,
       validationExpiredPage: 1,
-      validationExpiringPage: 1
+      validationExpiringPage: 1,
+      selectedPayslipWorker: null,
+      currentPayslip: null
     };
 
     // ==================== SETTINGS PERSISTENCE ====================
@@ -1133,6 +1276,308 @@
       renderValidationDashboard();
     }
 
+    // ==================== PAYSLIP ====================
+    function openPayslipModal() {
+      if (!state.workers.length) {
+        showStatus('No worker data available for payslip lookup.', 'error');
+        return;
+      }
+      renderPayslipGrid('');
+      openModal('payslip-modal');
+    }
+
+    function renderPayslipGrid(search) {
+      const tbody = document.getElementById('payslip-grid');
+      const countEl = document.getElementById('payslip-count');
+      if (!tbody) return;
+      const term = String(search || '').toLowerCase();
+      const workers = state.workers.filter(w => {
+        if (!term) return true;
+        return (w.personnelNumber || '').toLowerCase().includes(term) || (w.workerName || '').toLowerCase().includes(term);
+      });
+      if (countEl) countEl.innerText = `${workers.length} worker(s)`;
+      if (workers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-4 text-xs text-slate-500 text-center">No workers found</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = workers.slice(0, 100).map(w => `
+        <tr class="hover:bg-blue-50/60 cursor-pointer" onclick="openPayslipPeriodModal('${w.personnelNumber}', '${(w.workerName || '').replace(/'/g, "\\'")}', '${w.workerIntegrationKey || ''}')">
+          <td class="px-3 py-2 text-xs font-mono text-slate-900">${w.personnelNumber}</td>
+          <td class="px-3 py-2 text-xs text-slate-700">${w.workerName || ''}</td>
+          <td class="px-3 py-2 text-xs font-mono text-slate-700">${w.iqamaNumber || ''}</td>
+          <td class="px-3 py-2 text-xs text-slate-700">${w.jobProfession || ''}</td>
+          <td class="px-3 py-2 text-[10px] font-mono text-slate-500 break-all">${w.workerIntegrationKey || ''}</td>
+          <td class="px-3 py-2 text-right"><span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-1">Select</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function openPayslipPeriodModal(personnelNumber, workerName, workerKey) {
+      if (!workerKey) {
+        showStatus('Missing worker integration key for payslip.', 'error');
+        return;
+      }
+      state.selectedPayslipWorker = { personnelNumber, workerName, workerKey };
+      const title = document.getElementById('payslip-period-worker');
+      if (title) title.innerText = `${personnelNumber} - ${workerName}`;
+      const yearSelect = document.getElementById('payslip-year');
+      const monthSelect = document.getElementById('payslip-month');
+      const errorEl = document.getElementById('payslip-error');
+      if (errorEl) { errorEl.classList.add('hidden'); errorEl.innerText = ''; }
+      const currentYear = new Date().getFullYear();
+      const years = [currentYear, currentYear - 1, currentYear - 2];
+      if (yearSelect) {
+        yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        yearSelect.value = currentYear;
+      }
+      if (monthSelect) {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        monthSelect.innerHTML = months.map((m, idx) => `<option value="${idx + 1}">${m}</option>`).join('');
+        const now = new Date();
+        monthSelect.value = now.getMonth() + 1;
+      }
+      openModal('payslip-period-modal');
+    }
+
+    async function handlePayslipAction(mode) {
+      const worker = state.selectedPayslipWorker;
+      if (!worker) return;
+      const yearSelect = document.getElementById('payslip-year');
+      const monthSelect = document.getElementById('payslip-month');
+      const errorEl = document.getElementById('payslip-error');
+      const year = yearSelect ? yearSelect.value : new Date().getFullYear();
+      const month = monthSelect ? monthSelect.value : new Date().getMonth() + 1;
+      if (errorEl) { errorEl.classList.add('hidden'); errorEl.innerText = ''; }
+      try {
+        showStatus('Requesting payslip access token...', 'loading');
+        const tokenData = await api.getPaySlipOneTimeAccessToken(worker.workerKey, year, month);
+        const token = tokenData?.result;
+        if (!token) throw new Error('No access token returned for payslip');
+        showStatus('Fetching payslip data...', 'loading');
+        const payslip = await api.getWorkerPaySlipFromAX(token);
+        if (!payslip || !payslip.axResponse) {
+          throw new Error('No payslip data available for the selected period.');
+        }
+        state.currentPayslip = payslip;
+        renderPayslipViewer(payslip);
+        closeModal('payslip-period-modal');
+        openModal('payslip-viewer-modal');
+      } catch (error) {
+        if (error.status === 401) {
+          handleSessionExpired();
+          if (errorEl) {
+            errorEl.innerText = 'Session expired. Please login again.';
+            errorEl.classList.remove('hidden');
+          }
+        } else {
+          handleError(error, 'Payslip');
+          if (errorEl) {
+            errorEl.innerText = error.message || 'Failed to get payslip token.';
+            errorEl.classList.remove('hidden');
+          }
+        }
+      }
+    }
+
+    function renderPayslipViewer(data) {
+      const content = document.getElementById('payslip-viewer-content');
+      const subtitle = document.getElementById('payslip-viewer-subtitle');
+      if (!content) return;
+      const result = data || {};
+      const ax = result.axResponse || {};
+      const worker = result.worker || {};
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      if (subtitle) subtitle.innerText = `${worker.workerNo || ''} - ${worker.workerName || ''}`;
+
+      const earningsRows = (ax.earnings || []).map((item, idx) => `
+        <tr style="${idx % 2 === 1 ? 'background-color: #f5f5f5;' : ''}">
+          <td style="padding: 6px; border: 1px solid #000;">${item.earningType || ''}</td>
+          <td style="padding: 6px; border: 1px solid #000;">${item.amount != null ? item.amount : ''}</td>
+        </tr>
+      `).join('');
+
+      const deductionsRows = (ax.deductions || []).map((item, idx) => `
+        <tr style="${idx % 2 === 1 ? 'background-color: #f5f5f5;' : ''}">
+          <td style="padding: 6px; border: 1px solid #000;">${item.deductionType || ''}</td>
+          <td style="padding: 6px; border: 1px solid #000;">${item.amount != null ? item.amount : ''}</td>
+        </tr>
+      `).join('');
+
+      content.innerHTML = `
+        <div class="printpayslip" style="background-color: white; padding: 20px 30px 10px 30px;">
+          <div class="printcontainer" id="Content">
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="col-sm-3" style="float: left; padding-left: 0;">
+                    <img style="float:left" src="https://customerportal.smasco.com/assets/images/logopdf.png" onerror="this.style.display='none'" />
+                  </div>
+                  <div class="col-sm-3" style="float:right">
+                    <span class="payslip" style="font-weight: bold; font-size: 16px; color: #598407;"> PAYSLIP</span>
+                    <p>Period  <span style="display: inline-block;float: right;">&nbsp; ${result.strMonth || monthNames[(ax.month || 1) - 1] || ''} , ${ax.year || result.year || ''}</span> </p>
+                    <p style="margin: 10px 0 !important;">From date  <span style="display: inline-block;float: right;"> ${result.fromDate || ''}</span></p>
+                    <p>To date  <span style="display: inline-block;float: right;"> ${result.toDate || ''}</span></p>
+                  </div>
+                  <div style="clear: both;"></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12 titlehuman" style="margin-top: 30px; margin-bottom: 20px; color: #5a5a5a; font-size: 13px; font-weight: normal;">
+                  <b class="title">Human Resource Self-Service</b>
+                </div>
+              </div>
+
+              <table class="table table-bordered empDetailsprint" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                  <tr style="background-color: #f0f0f0 !important; color: #000;">
+                    <th colspan="4" style="padding: 8px; border: 1px solid #000; text-align: left;">Employee details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="background-color: #fafafa;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Employee Id</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.workerNo || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Name</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.workerName || ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Grade</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;"></td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Iqama/ID number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.iqamaNumber || ''}</td>
+                  </tr>
+                  <tr style="background-color: #fafafa;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Position</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.job?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Email address</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;"></td>
+                  </tr>
+                  <tr>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Job</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.job?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Phone number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.mobile || ''}</td>
+                  </tr>
+                  <tr style="background-color: #fafafa;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Nationality</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.nationality?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Payment date</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;"></td>
+                  </tr>
+                  <tr>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Date of joining</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;"></td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Account number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${ax.bankAccount || ''}</td>
+                  </tr>
+                  <tr style="background-color: #fafafa;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Working days</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${ax.workingDays != null ? ax.workingDays : ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Basic salary</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.salary != null ? worker.salary : ''}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              ${(ax.earnings || []).length > 0 || (ax.deductions || []).length > 0 ? `
+                <div class="titleallownceprint" style="color: #6b7c3e; font-weight: bold; margin-bottom: 10px; font-size: 13px;">Allowances and Deductions</div>
+                ${(ax.earnings || []).length > 0 ? `
+                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px;">
+                    <thead>
+                      <tr style="background: #f0f0f0; color: #000;">
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Allowances</th>
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${earningsRows}
+                    </tbody>
+                    <tfoot>
+                      <tr style="background: #f0f0f0;">
+                        <td style="padding: 8px; border: 1px solid #000; font-weight: bold;">Total allowances</td>
+                        <td style="padding: 8px; border: 1px solid #000;">${ax.totalEarnings != null ? ax.totalEarnings : ''}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                ` : ''}
+                ${(ax.deductions || []).length > 0 ? `
+                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px;">
+                    <thead>
+                      <tr style="background: #f0f0f0; color: #000;">
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Deductions</th>
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${deductionsRows}
+                    </tbody>
+                    <tfoot>
+                      <tr style="background: #f0f0f0;">
+                        <td style="padding: 8px; border: 1px solid #000; font-weight: bold;">Total Deductions</td>
+                        <td style="padding: 8px; border: 1px solid #000;">${ax.totalDeductions != null ? ax.totalDeductions : ''}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                ` : ''}
+              ` : ''}
+
+              ${ax.netPay != null && ax.netPay !== 0 ? `
+                <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                  <tbody>
+                    <tr>
+                      <td style="padding: 8px; border: 1px solid #000; font-weight: bold; width: 65%; vertical-align: top;">Net pay (Refund) :</td>
+                      <td style="padding: 8px; border: 1px solid #000; text-align: left; width: 35%; vertical-align: top;">${ax.netPay}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              ` : ''}
+            </div>
+          </div>
+          <div class="row" style="margin-top: 15px;">
+            <div class="col-sm-12">
+              <button class="btnexport no-print" onclick="printPayslip()" style="background-color: #598407; color: #fff; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; display: none !important;">Export To PDF</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function printPayslip() {
+      if (!state.currentPayslip) return;
+      const content = document.getElementById('payslip-viewer-content');
+      if (!content) return;
+      const printWindow = window.open('', '_blank', 'width=1024,height=900');
+      if (!printWindow) {
+        showStatus('Pop-up blocked. Please allow pop-ups to print payslip.', 'error');
+        return;
+      }
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Payslip</title>
+            <style>
+              @page { margin: 10mm 10mm 10mm 10mm; size: A4; }
+              * { box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 0; line-height: 1.4; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #000; padding: 5px 6px; text-align: left; vertical-align: top; }
+              thead th { background-color: #f0f0f0; color: #000; }
+              .empDetailsprint thead th { background-color: #666666; color: #fff; }
+              .titlehuman { font-weight: bold; margin-bottom: 20px; margin-top: 25px; }
+              .titleallownceprint { color: #6b7c3e; font-weight: bold; margin: 10px 0; font-size: 13px; }
+              p { margin: 3px 0; }
+              img { max-width: 200px; height: auto; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>${content.innerHTML}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 300);
+    }
+
     // ==================== MODAL & EXTRACTION CONTROLS ====================
     function showExtractionOverlay(message = 'Fetching worker details...') {
       const msgEl = document.getElementById('extraction-overlay-message');
@@ -1189,6 +1634,7 @@
         setButtonState('btn-refresh', { disabled: false });
         setButtonState('btn-export', { disabled: false });
         setButtonState('btn-validate', { disabled: false });
+        setButtonState('btn-payslip', { disabled: false });
 
         const creds = await storage.getCredentials().catch(() => null);
         document.getElementById('connected-username').innerText = creds?.username ? `@${creds.username} ` : '';
@@ -1236,6 +1682,7 @@
       setButtonState('btn-refresh', { disabled: true });
       setButtonState('btn-export', { disabled: true });
       setButtonState('btn-validate', { disabled: true });
+      setButtonState('btn-payslip', { disabled: true });
       document.getElementById('status-bar').classList.add('hidden');
 
       renderTreeSidebar();
@@ -1243,6 +1690,34 @@
       renderTableData();
       renderHeaderStats();
       storage._delete('settings', STORAGE_KEYS.AUTH_STATE).catch(() => {});
+    }
+
+    function handleSessionExpired() {
+      state.isAuthenticated = false;
+      state.authToken = null;
+      state.userId = null;
+      state.userKey = null;
+      state.contracts = [];
+      state.projects = [];
+      state.workers = [];
+      state.isExtracting = false;
+      state.selectedScope = { type: 'ALL', id: null };
+
+      document.getElementById('auth-overlay').classList.remove('hidden');
+      document.getElementById('auth-unconnected-form').classList.remove('hidden');
+      document.getElementById('auth-connected-badge').classList.add('hidden');
+      setButtonState('btn-refresh', { disabled: true });
+      setButtonState('btn-export', { disabled: true });
+      setButtonState('btn-validate', { disabled: true });
+      setButtonState('btn-payslip', { disabled: true });
+      document.getElementById('status-bar').classList.add('hidden');
+
+      renderTreeSidebar();
+      renderTableHeader();
+      renderTableData();
+      renderHeaderStats();
+      storage._delete('settings', STORAGE_KEYS.AUTH_STATE).catch(() => {});
+      showStatus('Session expired. Please login again.', 'error');
     }
 
     // ==================== DATA FETCHING HELPERS ====================
@@ -1285,7 +1760,7 @@
           for (const worker of summary.data) {
             const personnelNum = worker.personnelNumber;
             if (!personnelNum) continue;
-            const detail = await storage.getWorkerDetail(projectNum, personnelNum);
+            const detail = await storage.getWorkerDetailAnyDate(projectNum, personnelNum);
             if (detail && detail.data) {
               const rawRecord = extractFirstWorkerRecord(detail.data);
               const normalized = normalizeWorkerDetail(rawRecord);
@@ -2370,6 +2845,7 @@
         setButtonState('btn-refresh', { disabled: false });
         setButtonState('btn-export', { disabled: false });
         setButtonState('btn-validate', { disabled: false });
+        setButtonState('btn-payslip', { disabled: false });
 
         const restoredCreds = await storage.getCredentials().catch(() => null);
         document.getElementById('connected-username').innerText = restoredCreds?.username ? `@${restoredCreds.username} ` : '';
