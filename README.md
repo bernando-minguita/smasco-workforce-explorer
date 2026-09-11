@@ -72,7 +72,7 @@ All data is cached locally using IndexedDB, enabling offline access and fast rel
 ### Prerequisites
 
 - A modern web browser (Chrome, Edge, Firefox, Safari).
-- Valid SMASCO account credentials (username/password).
+- Valid SMASCO customer portal account credentials (username/password).
 
 ### Installation
 
