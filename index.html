@@ -157,7 +157,7 @@
                         <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
                         <span>Validation Dashboard</span>
                     </button>
-                    <button id="btn-refresh" onclick="showRefreshModal()" disabled class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 text-white px-3.5 py-1 rounded text-xs font-medium transition-all shadow-sm disabled:cursor-not-allowed">
+                    <button id="btn-refresh" onclick="showRefreshModal()" disabled class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1 rounded text-xs font-medium transition-all border border-blue-600 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-icon"></i>
                         <span id="refresh-label">Refresh All</span>
                     </button>
@@ -533,7 +533,7 @@
                                     <th class="px-3 py-2">Worker Name</th>
                                     <th class="px-3 py-2">Iqama #</th>
                                     <th class="px-3 py-2">Profession</th>
-                                    <th class="px-3 py-2">Integration Key</th>
+                                    <th class="px-3 py-2 payslip-integration-key">Integration Key</th>
                                     <th class="px-3 py-2 text-right">Action</th>
                                 </tr>
                             </thead>
@@ -758,11 +758,11 @@
                 return Array.isArray(data) ? data : [];
             },
 
-            async getWorkers(projectKey) {
-                const url = `${API_BASE}/AxApiServices/GetWorkersByProjectKey`;
-                const data = await this.request(url, { method: 'GET', params: { projIntegrationKey: projectKey, isHandover: 'false' } });
-                return Array.isArray(data) ? data : [];
-            },
+             async getWorkers(projectKey) {
+                 const url = `${API_BASE}/AxApiServices/GetWorkersByProjectKey`;
+                 const data = await this.request(url, { method: 'GET', params: { projIntegrationKey: projectKey, isHandover: false } });
+                 return Array.isArray(data) ? data : [];
+             },
 
             async getWorkerDetails(workerKey) {
                 const url = `${API_BASE}/AxApiServices/GetWorkerProjectDetails`;
@@ -906,10 +906,7 @@
             async getWorkerDetail(projectNum, personnelNum) {
                 const key = `worker_${projectNum}_${personnelNum}`;
                 const result = await this._get('workerDetails', key);
-                if (!result) return null;
-                const extractedDate = new Date(result.extracted_at);
-                if (extractedDate.toDateString() === new Date().toDateString()) return result;
-                return null;
+                return result || null;
             },
 
             async getWorkerDetailAnyDate(projectNum, personnelNum) {
@@ -988,7 +985,7 @@
             collapsedContracts: new Set(),
             collapsedProjects: new Set(),
             hiddenColumns: new Set(['projectId', 'projectName', 'projectStatus', 'contractNumber', 'contractStartDate',
-                'contractEndDate', 'availbleStatusName'
+                'contractEndDate', 'availableStatusName'
             ]),
             sidebarCollapsed: false,
             hideZeroWorkerProjects: false,
@@ -1015,7 +1012,7 @@
                     state.collapsedProjects = new Set(await storage.getSetting(STORAGE_KEYS.COLLAPSED_PROJECTS, []));
                     state.hiddenColumns = new Set(await storage.getSetting(STORAGE_KEYS.HIDDEN_COLUMNS, ['projectId',
                         'projectName', 'projectStatus', 'contractNumber', 'contractStartDate', 'contractEndDate',
-                        'availbleStatusName'
+                        'availableStatusName'
                     ]));
                     state.sidebarCollapsed = await storage.getSetting(STORAGE_KEYS.SIDEBAR_COLLAPSED, false);
                     state.hideZeroWorkerProjects = await storage.getSetting(STORAGE_KEYS.HIDE_ZERO_WORKER_PROJECTS, false);
@@ -1106,7 +1103,7 @@
             const btnRefresh = document.getElementById('btn-refresh');
             const btnConnect = document.getElementById('btn-connect');
             if (banner) banner.classList.toggle('hidden', !isOffline);
-            if (btnRefresh) btnRefresh.disabled = isOffline || state.isExtracting;
+            if (btnRefresh) btnRefresh.disabled = isOffline || state.isExtracting || !state.isAuthenticated;
             if (btnConnect) btnConnect.disabled = isOffline;
             if (isOffline) {
                 showStatus('You are offline. Using cached data.', 'info');
@@ -1349,12 +1346,12 @@
                 return;
             }
             tbody.innerHTML = workers.slice(0, 100).map(w => `
-        <tr class="hover:bg-blue-50/60 cursor-pointer" onclick="openPayslipPeriodModal('${w.personnelNumber}', '${(w.workerName || '').replace(/'/g, "\\'")}', '${w.workerIntegrationKey || ''}')">
-          <td class="px-3 py-2 text-xs font-mono text-slate-900">${w.personnelNumber}</td>
-          <td class="px-3 py-2 text-xs text-slate-700">${w.workerName || ''}</td>
-          <td class="px-3 py-2 text-xs font-mono text-slate-700">${w.iqamaNumber || ''}</td>
-          <td class="px-3 py-2 text-xs text-slate-700">${w.jobProfession || ''}</td>
-          <td class="px-3 py-2 text-[10px] font-mono text-slate-500 break-all">${w.workerIntegrationKey || ''}</td>
+        <tr class="hover:bg-blue-50/60 cursor-pointer" onclick="openPayslipPeriodModal('${escapeHtmlAttr(w.personnelNumber)}', '${escapeHtmlAttr(w.workerName || '')}', '${escapeHtmlAttr(w.workerIntegrationKey || '')}')">
+          <td class="px-3 py-2 text-xs font-mono text-slate-900">${escapeHtml(w.personnelNumber)}</td>
+          <td class="px-3 py-2 text-xs text-slate-700">${escapeHtml(w.workerName || '')}</td>
+          <td class="px-3 py-2 text-xs font-mono text-slate-700">${escapeHtml(w.iqamaNumber || '')}</td>
+          <td class="px-3 py-2 text-xs text-slate-700">${escapeHtml(w.jobProfession || '')}</td>
+          <td class="px-3 py-2 text-[10px] font-mono text-slate-500 break-all payslip-integration-key">${escapeHtml(w.workerIntegrationKey || '')}</td>
           <td class="px-3 py-2 text-right"><span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-1">Select</span></td>
         </tr>
       `).join('');
@@ -1447,17 +1444,17 @@
             ];
             if (subtitle) subtitle.innerText = `${worker.workerNo || ''} - ${worker.workerName || ''}`;
 
-            const earningsRows = (ax.earnings || []).map((item, idx) => `
+             const earningsRows = (ax.earnings || []).map((item, idx) => `
         <tr style="${idx % 2 === 1 ? 'background-color: #f5f5f5;' : ''}">
-          <td style="padding: 6px; border: 1px solid #000;">${item.earningType || ''}</td>
-          <td style="padding: 6px; border: 1px solid #000;">${item.amount != null ? item.amount : ''}</td>
+          <td style="padding: 6px; border: 1px solid #444;">${item.earningType || ''}</td>
+          <td style="padding: 6px; border: 1px solid #444;">${item.amount != null ? item.amount : ''}</td>
         </tr>
       `).join('');
 
             const deductionsRows = (ax.deductions || []).map((item, idx) => `
         <tr style="${idx % 2 === 1 ? 'background-color: #f5f5f5;' : ''}">
-          <td style="padding: 6px; border: 1px solid #000;">${item.deductionType || ''}</td>
-          <td style="padding: 6px; border: 1px solid #000;">${item.amount != null ? item.amount : ''}</td>
+          <td style="padding: 6px; border: 1px solid #444;">${item.deductionType || ''}</td>
+          <td style="padding: 6px; border: 1px solid #444;">${item.amount != null ? item.amount : ''}</td>
         </tr>
       `).join('');
 
@@ -1480,99 +1477,99 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-sm-12 titlehuman" style="margin-top: 30px; margin-bottom: 20px; color: #5a5a5a; font-size: 13px; font-weight: normal;">
+                <div class="col-sm-12 titlehuman" style="margin-top: 30px; margin-bottom: 20px; color: #1b5e20; font-size: 13px; font-weight: normal;">
                   <b class="title">Human Resource Self-Service</b>
                 </div>
               </div>
 
-              <table class="table table-bordered empDetailsprint" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+               <table class="table table-bordered empDetailsprint" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                 <thead>
-                  <tr style="background-color: #f0f0f0 !important; color: #000;">
-                    <th colspan="4" style="padding: 8px; border: 1px solid #000; text-align: left;">Employee details</th>
+                   <tr style="background-color: #f0f0f0 !important; color: #000; border-bottom: 2px solid #444;">
+                     <th colspan="4" style="padding: 8px; border: 1px solid #444; text-align: left; border-bottom: 2px solid #444;">EMPLOYEE DETAILS</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style="background-color: #fafafa;">
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Employee Id</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.workerNo || ''}</td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Name</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.workerName || ''}</td>
+                  <tr>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Employee Id</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;">${worker.workerNo || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Name</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;">${worker.workerName || ''}</td>
+                  </tr>
+                  <tr style="background-color: #f5f5f5;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Grade</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;"></td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Iqama/ID number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;">${worker.iqamaNumber || ''}</td>
                   </tr>
                   <tr>
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Grade</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;"></td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Iqama/ID number</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.iqamaNumber || ''}</td>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Position</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;">${worker.job?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Email address</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;"></td>
                   </tr>
-                  <tr style="background-color: #fafafa;">
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Position</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.job?.name || ''}</td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Email address</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;"></td>
-                  </tr>
-                  <tr>
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Job</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.job?.name || ''}</td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Phone number</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.mobile || ''}</td>
-                  </tr>
-                  <tr style="background-color: #fafafa;">
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Nationality</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${worker.nationality?.name || ''}</td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Payment date</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;"></td>
+                  <tr style="background-color: #f5f5f5;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Job</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;">${worker.job?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Phone number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;">${worker.mobile || ''}</td>
                   </tr>
                   <tr>
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Date of joining</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;"></td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Account number</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${ax.bankAccount || ''}</td>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Nationality</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;">${worker.nationality?.name || ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Payment date</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;"></td>
                   </tr>
-                  <tr style="background-color: #fafafa;">
-                    <td style="width: 19%; padding: 6px; border: 1px solid #000;">Working days</td>
-                    <td style="width: 25%; padding: 6px; border: 1px solid #000;">${ax.workingDays != null ? ax.workingDays : ''}</td>
-                    <td style="width: 21%; padding: 6px; border: 1px solid #000;">Basic salary</td>
-                    <td style="width: 35%; padding: 6px; border: 1px solid #000;">${worker.salary != null ? worker.salary : ''}</td>
+                  <tr style="background-color: #f5f5f5;">
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Date of joining</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;"></td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Account number</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;">${ax.bankAccount || ''}</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 19%; padding: 6px; border: 1px solid #444;">Working days</td>
+                    <td style="width: 25%; padding: 6px; border: 1px solid #444;">${ax.workingDays != null ? ax.workingDays : ''}</td>
+                    <td style="width: 21%; padding: 6px; border: 1px solid #444;">Basic salary</td>
+                    <td style="width: 35%; padding: 6px; border: 1px solid #444;">${worker.salary != null ? worker.salary : ''}</td>
                   </tr>
                 </tbody>
               </table>
 
               ${(ax.earnings || []).length > 0 || (ax.deductions || []).length > 0 ? `
-                <div class="titleallownceprint" style="color: #6b7c3e; font-weight: bold; margin-bottom: 10px; font-size: 13px;">Allowances and Deductions</div>
+                <div class="titleallownceprint" style="color: #1b5e20; font-weight: bold; margin-bottom: 10px; font-size: 13px;">Allowances and Deductions</div>
                 ${(ax.earnings || []).length > 0 ? `
-                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px;">
+                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #444; margin-bottom: 15px;">
                     <thead>
-                      <tr style="background: #f0f0f0; color: #000;">
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Allowances</th>
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Amount</th>
-                      </tr>
+                      <tr style="background: #f0f0f0; color: #000; border-bottom: 2px solid #444;">
+                           <th style="padding: 8px; border: 1px solid #444; text-align: left; border-bottom: 2px solid #444;">ALLOWANCES</th>
+                           <th style="padding: 8px; border: 1px solid #444; text-align: left; border-bottom: 2px solid #444;">AMOUNT</th>
+                       </tr>
                     </thead>
                     <tbody>
                       ${earningsRows}
                     </tbody>
                     <tfoot>
                       <tr style="background: #f0f0f0;">
-                        <td style="padding: 8px; border: 1px solid #000; font-weight: bold;">Total allowances</td>
-                        <td style="padding: 8px; border: 1px solid #000;">${ax.totalEarnings != null ? ax.totalEarnings : ''}</td>
+                        <td style="padding: 8px; border: 1px solid #444; font-weight: bold;">Total allowances</td>
+                        <td style="padding: 8px; border: 1px solid #444;">${ax.totalEarnings != null ? ax.totalEarnings : ''}</td>
                       </tr>
                     </tfoot>
                   </table>
                 ` : ''}
                 ${(ax.deductions || []).length > 0 ? `
-                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 15px;">
+                  <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #444; margin-bottom: 15px;">
                     <thead>
-                      <tr style="background: #f0f0f0; color: #000;">
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Deductions</th>
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left;">Amount</th>
-                      </tr>
+                       <tr style="background: #f0f0f0; color: #000; border-bottom: 2px solid #444;">
+                          <th style="padding: 8px; border: 1px solid #444; text-align: left; border-bottom: 2px solid #444;">DEDUCTIONS</th>
+                          <th style="padding: 8px; border: 1px solid #444; text-align: left; border-bottom: 2px solid #444;">AMOUNT</th>
+                       </tr>
                     </thead>
                     <tbody>
                       ${deductionsRows}
                     </tbody>
                     <tfoot>
                       <tr style="background: #f0f0f0;">
-                        <td style="padding: 8px; border: 1px solid #000; font-weight: bold;">Total Deductions</td>
-                        <td style="padding: 8px; border: 1px solid #000;">${ax.totalDeductions != null ? ax.totalDeductions : ''}</td>
+                        <td style="padding: 8px; border: 1px solid #444; font-weight: bold;">Total Deductions</td>
+                        <td style="padding: 8px; border: 1px solid #444;">${ax.totalDeductions != null ? ax.totalDeductions : ''}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -1580,11 +1577,11 @@
               ` : ''}
 
               ${ax.netPay != null && ax.netPay !== 0 ? `
-                <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                <table class="table table-bordered" style="width: 100%; border-collapse: collapse; border: 1px solid #444; margin-top: 15px;">
                   <tbody>
                     <tr>
-                      <td style="padding: 8px; border: 1px solid #000; font-weight: bold; width: 65%; vertical-align: top;">Net pay (Refund) :</td>
-                      <td style="padding: 8px; border: 1px solid #000; text-align: left; width: 35%; vertical-align: top;">${ax.netPay}</td>
+                       <td style="padding: 8px; border: 1px solid #444; font-weight: bold; text-align: left; width: 62%;">Net pay (Refund) :</td>
+                       <td style="padding: 8px; border: 1px solid #444; text-align: left; width: 38%;">${ax.netPay}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1618,9 +1615,9 @@
               * { box-sizing: border-box; }
               body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; padding: 0; line-height: 1.4; }
               table { width: 100%; border-collapse: collapse; }
-              th, td { border: 1px solid #000; padding: 5px 6px; text-align: left; vertical-align: top; }
+              th, td { border: 1px solid #444; padding: 5px 6px; text-align: left; vertical-align: top; }
               thead th { background-color: #f0f0f0; color: #000; }
-              .empDetailsprint thead th { background-color: #666666; color: #fff; }
+               .empDetailsprint thead th { background-color: #f0f0f0; color: #000; }
               .titlehuman { font-weight: bold; margin-bottom: 20px; margin-top: 25px; }
               .titleallownceprint { color: #6b7c3e; font-weight: bold; margin: 10px 0; font-size: 13px; }
               p { margin: 3px 0; }
@@ -1653,6 +1650,10 @@
         }
 
         function showRefreshModal() {
+            if (!state.isAuthenticated) {
+                showStatus('Please connect to refresh data.', 'error');
+                return;
+            }
             openModal('refresh-modal');
         }
 
@@ -1982,6 +1983,16 @@
             const str = String(value);
             if (str.includes('T')) return str.split('T')[0];
             return str;
+        }
+
+        function escapeHtmlAttr(str) {
+            if (str == null) return '';
+            return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
         function recalculateValidityDays(worker) {
@@ -2865,7 +2876,7 @@
             { key: 'salary', label: 'Salary (SAR)', width: 'w-28' },
             { key: 'jobProfession', label: 'Job Profession', width: 'w-40' },
             { key: 'mainStatusName', label: 'Main Status', width: 'w-28' },
-            { key: 'availbleStatusName', label: 'Avail. Status', width: 'w-28' },
+            { key: 'availableStatusName', label: 'Avail. Status', width: 'w-28' },
             { key: 'dateOfJoin', label: 'Date of Join', width: 'w-28' },
             { key: 'passportNumber', label: 'Passport #', width: 'w-32' },
             { key: 'passportExpirationDate', label: 'Passport Expiry', width: 'w-28' },
@@ -2884,6 +2895,10 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             state.selectedScope = { type: 'ALL', id: null };
+            setButtonState('btn-refresh', { disabled: true });
+            setButtonState('btn-export', { disabled: true });
+            setButtonState('btn-validate', { disabled: true });
+            setButtonState('btn-payslip', { disabled: true });
             await settings.load();
             await storage.migrateFromLocalStorage();
 
@@ -2900,6 +2915,18 @@
             if (creds) {
                 document.getElementById('auth-username').value = creds.username || '';
             }
+
+            const authUsername = document.getElementById('auth-username');
+            const authPassword = document.getElementById('auth-password');
+            const onAuthKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    const u = authUsername.value.trim();
+                    const p = authPassword.value.trim();
+                    if (u && p) handleConnect();
+                }
+            };
+            if (authUsername) authUsername.addEventListener('keydown', onAuthKeyDown);
+            if (authPassword) authPassword.addEventListener('keydown', onAuthKeyDown);
 
             const authState = await storage.getSetting(STORAGE_KEYS.AUTH_STATE, null);
             if (authState && authState.isAuthenticated) {
@@ -2932,6 +2959,10 @@
                 document.getElementById('status-bar').classList.remove('hidden');
                 document.getElementById('status-icon').innerHTML = '<span class="text-slate-400">ℹ</span>';
                 document.getElementById('status-message').innerText = 'Ready - Enter credentials and click Connect';
+                setButtonState('btn-refresh', { disabled: true });
+                setButtonState('btn-export', { disabled: true });
+                setButtonState('btn-validate', { disabled: true });
+                setButtonState('btn-payslip', { disabled: true });
             }
 
             initOfflineMode();
