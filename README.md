@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/yourusername/smasco-workforce-explorer)
 
-> A powerful single‑page web application to explore, manage, and validate workforce data from SMASCO's API.
+> A powerful single‑page web application to explore, manage, and validate SMASCO workforce data.
 
 ---
 
@@ -15,7 +15,6 @@
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
 - [Usage](#-usage)
-- [API Endpoints](#-api-endpoints)
 - [Data Persistence](#-data-persistence)
 - [Offline Mode](#-offline-mode)
 - [Contributing](#-contributing)
@@ -25,11 +24,11 @@
 
 ## 🧭 Overview
 
-**SMASCO Workforce Explorer** is a client‑side dashboard that connects to SMASCO's backend services to retrieve contracts, projects, and worker details. It provides a clean interface for:
+**SMASCO Workforce Explorer** is a client‑side dashboard for browsing contracts, projects, and worker details. It provides a clean interface for:
 
 - Browsing all workforce data with advanced filtering and sorting.
 - Drilling down into individual worker profiles with document expiry tracking.
-- Generating payslips on‑demand via a one‑time access token.
+- Generating payslips on‑demand by selecting a worker and period.
 - Validating document expiry and viewing status distributions.
 - Exporting the full dataset to Excel.
 
@@ -49,8 +48,8 @@ All data is cached locally using IndexedDB, enabling offline access and fast rel
 | 🖨️ **Print Payslip** | Print or save a payslip as PDF from the viewer. |
 | ✅ **Validation Dashboard** | Overview of expired/expiring documents and worker status distribution. |
 | 📊 **Excel Export** | Generate a master Excel file of all filtered workers. |
-| ⚡ **Parallel Extraction** | Multi‑threaded API fetching for faster data population. |
-| 💾 **IndexedDB Cache** | All worker details and summaries are cached; refresh from cache or live API. |
+| ⚡ **Parallel Extraction** | Concurrent data fetching for faster population. |
+| 💾 **IndexedDB Cache** | All worker details and summaries are cached locally for fast reloads. |
 | 📱 **Offline Support** | Service worker and cache provide basic offline functionality. |
 
 ---
@@ -79,6 +78,4 @@ All data is cached locally using IndexedDB, enabling offline access and fast rel
 
 This is a **single HTML file** – no build tools needed!
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/bernando-minguita/smasco-workforce-explorer.git
+Download `index.html` and open it directly in your browser.
