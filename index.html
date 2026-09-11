@@ -1859,6 +1859,11 @@
         function handleSessionExpired() {
             resetAuthState();
             state.selectedScope = { type: 'ALL', id: null };
+            const authOverlay = document.getElementById('auth-overlay');
+            if (authOverlay && !authOverlay.classList.contains('hidden')) {
+                showStatus('Session expired. Please login again.', 'error');
+                return;
+            }
             openModal('session-expired-modal');
             showStatus('Session expired. Please login again.', 'error');
         }
